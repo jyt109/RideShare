@@ -175,14 +175,13 @@
                 // var table = $('#rs_entries').dataTable(); //fnGet methods
                 // var pos = table.fnGetPosition(this)[0]
                 // var data_dict = table.fnGetData(pos)
-
+                debugger;
+                console.log('sddsd');
                 var table = $('#rs_entries').DataTable(); //row methods
-
-
-                // debugger;
                 var tr = $(this).closest('tr');
                 var row = table.row(tr);
-
+                var rows = table.row();
+                debugger;
                 function format (d) {
                     // `d` is the original data object for the row
                     return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
@@ -202,14 +201,16 @@
                 }
 
                 
-                // debugger;
                 if ( row.child.isShown() ) {
                     // This row is already open - close it
+
                     row.child.hide();
                     tr.removeClass('shown');
                 }
                 else {
                     // Open this row
+                    $('tr.shown + tr').remove()
+                    $('tr.shown').removeClass('shown')
                     row.child( format(row.data()) ).show();
                     tr.addClass('shown');
                 }
@@ -223,7 +224,7 @@
     </script>
     <style>
         #map {
-            height: 470px;
+            height: 450px;
             width: 600px;
             float: left;
         }
@@ -238,7 +239,7 @@
             background-color: rgba(70, 130, 180, 0.1); 
         }
         .main_container {
-            width: 1200px;
+            width: 1250px;
             padding-top: 20px;
             padding-bottom: 20px;
             margin-left: auto ;
@@ -265,6 +266,12 @@
         .dataTables_info {
             font-size: 11px;
             opacity: 0.4;
+        }
+        div.dataTables_paginate ul.pagination {
+            margin: 0px 0px 0px -100px;
+        }
+        .pagination {
+            margin: 0px 0px 0px -100px;
         }
         .pagination>li>a, .pagination>li>span {
             padding: 4px 9px;
@@ -310,11 +317,11 @@
         td.details-control {
             background: url('../static/images/details_open.png') no-repeat center center;
             cursor: pointer;
-            background-size: 50% 55%;
+            background-size: 40% 45%%;
         }
         tr.shown td.details-control {
             background: url('../static/images/details_close.png') no-repeat center center;
-            background-size: 50% 55%;
+            background-size: 40% 45%%;
         }
 
     </style>
@@ -327,13 +334,13 @@
             <thead>
                 <tr>
                     <th></th>
-                    <th>Current Ride</th>
-                    <th>Matched Ride</th>
-                    <th>Time (am)</th>
-                    <th>Miles Saved</th>
-                    <th>Extra Time</th>
-                    <th>Money Saved</th>
-                    <th>RideShare Score</th>
+                    <th>Current<br>Ride</th>
+                    <th>Matched<br>Ride</th>
+                    <th>Time<br>(am)</th>
+                    <th>Miles<br>Saved</th>
+                    <th>Extra<br>Time</th>
+                    <th>Money<br>Saved</th>
+                    <th>RideShare<br>Score</th>
                 </tr>
           </thead>
 
