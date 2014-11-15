@@ -26,25 +26,6 @@
             $('.leaflet-zoom-hide').remove()
         }
 
-
-        /* Custom filtering function which will search data in column four between two values */
-        $.fn.dataTable.ext.search.push(
-            function( settings, data, dataIndex ) {
-                var min = parseInt( $('#min').val(), 10 );
-                var max = parseInt( $('#max').val(), 10 );
-                var miles_saved = parseFloat( data[3] ) || 0; // use data for the age column
-         
-                if ( ( isNaN( min ) && isNaN( max ) ) ||
-                     ( isNaN( min ) && miles_saved <= max ) ||
-                     ( min <= miles_saved   && isNaN( max ) ) ||
-                     ( min <= miles_saved   && miles_saved <= max ) )
-                {
-                    return true;
-                }
-                return false;
-            }
-        );
-
         //calling data to map
         $(document).ready(function(){
             $('#rs_entries').DataTable({
@@ -200,8 +181,6 @@
             }); //end of datatable (just before ready document)
             //remove the show 10 entries drop down
             $('.dataTables_length').remove()
-            //remove the annoying purple arrow in the th cells
-            $('.sorting_asc').removeClass('sorting_asc');
         }); //document ready end
         //add ride share moving path
         function get_ride_share() {
@@ -232,6 +211,10 @@
             padding-bottom: 20px;
             margin-left: auto ;
             margin-right: auto ;
+        }
+        table.dataTable thead .sorting_asc, 
+        table.dataTable thead .sorting_desc {
+            background: none;
         }
         tr td {
             font-size: 12px;
