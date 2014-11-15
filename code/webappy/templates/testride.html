@@ -60,6 +60,8 @@
                         var mride = row[0];
                         var cride = row[1];
                         console.log(row);
+                        // "processing": true,
+                        // "serverSide": true,
                         $.ajax({
                            'url' : '/getroutebyid',
                            'data' : JSON.stringify([cride, mride]),
@@ -114,7 +116,10 @@
 
                                 //make multiple popup open together
                                 function marker_pop_bind(marker, content) {
-                                    marker.bindPopup(content, {'closeButton': false, 'minWidth': 0, 'maxHeight': 20});
+                                    marker.bindPopup(content, {'closeButton': false, 
+                                                                'minWidth': 0,
+                                                                'maxHeight': 20,
+                                                                'closeOnClick': false});
                                     marker.openPopup();
                                 }//marker_pop_bind
 
