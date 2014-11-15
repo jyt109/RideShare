@@ -123,7 +123,6 @@
                                                                 'weight': 6}).addTo(map);
                                 map.setView(longer_route[mid_point], 12);
 
-                                // debugger;
                                 //blue is current, green is mathched
                                 var start_blue = croute[0],
                                 end_blue = croute[c_len - 1],
@@ -175,13 +174,11 @@
                 // var table = $('#rs_entries').dataTable(); //fnGet methods
                 // var pos = table.fnGetPosition(this)[0]
                 // var data_dict = table.fnGetData(pos)
-                debugger;
                 console.log('sddsd');
                 var table = $('#rs_entries').DataTable(); //row methods
                 var tr = $(this).closest('tr');
                 var row = table.row(tr);
                 var rows = table.row();
-                debugger;
                 function format (d) {
                     // `d` is the original data object for the row
                     return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
@@ -233,10 +230,11 @@
             width: 100%;
             height: 100%;
         }
-        .table tbody tr:hover {
+        .table tbody tr.even:hover,
+        .table tbody tr.odd:hover{
             cursor: pointer;
             background-color: rgb(0, 0, 0);
-            background-color: rgba(70, 130, 180, 0.1); 
+            background-color: rgba(70, 130, 180, 0.1) !important; 
         }
         .main_container {
             width: 1250px;
@@ -268,9 +266,6 @@
             opacity: 0.4;
         }
         div.dataTables_paginate ul.pagination {
-            margin: 0px 0px 0px -100px;
-        }
-        .pagination {
             margin: 0px 0px 0px -100px;
         }
         .pagination>li>a, .pagination>li>span {
@@ -317,12 +312,17 @@
         td.details-control {
             background: url('../static/images/details_open.png') no-repeat center center;
             cursor: pointer;
-            background-size: 40% 45%%;
+            background-size: 50% 65%;
         }
         tr.shown td.details-control {
             background: url('../static/images/details_close.png') no-repeat center center;
-            background-size: 40% 45%%;
+            background-size: 50% 65%;
         }
+        .table>thead>tr>th, .table>tbody>tr>th,
+        .table>tfoot>tr>th, .table>thead>tr>td,
+         .table>tbody>tr>td, .table>tfoot>tr>td {
+            padding: 6px;
+         }
 
     </style>
 {% endblock %}
