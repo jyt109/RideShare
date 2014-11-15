@@ -53,7 +53,7 @@
                 //     "searchable":true}
                 // ],
                 "fnInitComplete" : function (oSettings,json) {
-                    $("#rs_entries").find('tr').click( function( e ) {
+                    $("#rs_entries").on('click', 'tr', function( e ) {
                         var table = $('#rs_entries').dataTable();
                         var pos = table.fnGetPosition(this);
                         var row = table.fnGetData()[pos];
