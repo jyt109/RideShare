@@ -11,7 +11,6 @@
         function parse_to_float(data) {
             var lst = [];
             for (var i=0; i < data.length; i++) {
-                //console.log(data[i])
                 lst.push(data[i].map(parseFloat));
             }
             return lst
@@ -25,6 +24,25 @@
             map.removeLayer(start_green_mark);
             map.removeLayer(end_green_mark);
             $('.leaflet-zoom-hide').remove()
+        }
+
+        /* Formatting function for row details - modify as you need */
+        function format (one, two, three) {
+            // `d` is the original data object for the row
+            return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+                '<tr>'+
+                    '<td>Full name:</td>'+
+                    '<td>'+ one +'</td>'+
+                '</tr>'+
+                '<tr>'+
+                    '<td>Extension number:</td>'+
+                    '<td>'+ two +'</td>'+
+                '</tr>'+
+                '<tr>'+
+                    '<td>Extra info:</td>'+
+                    '<td>' + three + '</td>'+
+                '</tr>'+
+            '</table>';
         }
 
         /* Custom filtering function which will search data in column four between two values */
@@ -81,8 +99,9 @@
                         var mride = row[0];
                         var cride = row[1];
                         console.log(row);
-                        // "processing": true,
-                        // "serverSide": true,
+                        var point_1 = row[7],
+                        point_2 = row[8],
+                        point_3 = row[9];
                         $.ajax({
                            'url' : '/getroutebyid',
                            'data' : JSON.stringify([cride, mride]),
