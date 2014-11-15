@@ -60,6 +60,7 @@
                     { sWidth: '30px' },
                     { sWidth: '30px' },
                     { sWidth: '50px' },
+                    { sWidth: '30px' },
                     { sWidth: '30px' }
                 ],
                 // "columnDefs": [
@@ -91,7 +92,6 @@
                                 //disable button to get share ride 
                                 //still the last shared ride, hasn't been updated
                                 $("button").prop("disabled",true);
-                                //setTimeout(continueExecution, 5000)
                                 // Remove the route on the map
                                 if (typeof(cline) !== 'undefined') {
                                     click_to_remove();
@@ -184,7 +184,7 @@
             background-color: rgba(70, 130, 180, 0.1); 
         }
         .main_container {
-            width: 1130px;
+            width: 1200px;
             padding-top: 20px;
             padding-bottom: 20px;
             margin-left: auto ;
@@ -268,6 +268,7 @@
                   <th>Miles Saved</th>
                   <th>Extra Time</th>
                   <th>Money Saved</th>
+                  <th>RideShare Score</th>
                 </tr>
           </thead>
         </table>

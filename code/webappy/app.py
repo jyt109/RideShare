@@ -44,7 +44,7 @@ def index():
 @app.route('/readjson', methods=['POST'])
 def read_json():
     print 'Loading rides file...'
-    d = json.load(open('data/testing.json'))
+    d = json.load(open('data/results.json'))
     return json.dumps(d)
 
 @app.route('/testshare')
@@ -63,7 +63,7 @@ def getroutebyid():
            WHERE %s = c_ride
            AND %s  =  mride''' % (cride, mride)
     routes_pandas = pdsql.read_sql(q, app.conn)
-    print routes_pandas
+    print 'Got routes'
     rs_route = routes_pandas['shared_route'].apply(path_parse).tolist()[0]
     rs_route_json = lst_to_geojson(rs_route)
     app.shared_route = rs_route_json
