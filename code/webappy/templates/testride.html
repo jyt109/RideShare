@@ -26,24 +26,6 @@
             $('.leaflet-zoom-hide').remove()
         }
 
-        /* Formatting function for row details - modify as you need */
-        function format (one, two, three) {
-            // `d` is the original data object for the row
-            return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
-                '<tr>'+
-                    '<td>Full name:</td>'+
-                    '<td>'+ one +'</td>'+
-                '</tr>'+
-                '<tr>'+
-                    '<td>Extension number:</td>'+
-                    '<td>'+ two +'</td>'+
-                '</tr>'+
-                '<tr>'+
-                    '<td>Extra info:</td>'+
-                    '<td>' + three + '</td>'+
-                '</tr>'+
-            '</table>';
-        }
 
         /* Custom filtering function which will search data in column four between two values */
         $.fn.dataTable.ext.search.push(
@@ -65,23 +47,31 @@
 
         //calling data to map
         $(document).ready(function(){
-            $('#rs_entries').dataTable({
+            $('#rs_entries').DataTable({
                 'ajax': {
                     'url': 'readjson',
                     'type': 'POST'
                 },
                 "bFilter": false,
                 "bAutoWidth": false,
-                "aoColumns" : [
-                    { sWidth: '30px' },
-                    { sWidth: '30px' },
-                    { sWidth: '30px' },
-                    { sWidth: '30px' },
-                    { sWidth: '50px' },
-                    { sWidth: '30px' },
-                    { sWidth: '30px' }
+                "columns": [
+                    {
+                        "class":  'details-control',
+                        "orderable":      false,
+                        "data":           null,
+                        "defaultContent": ''
+                    },
+                    { "data": 0, "orderable": false},
+                    { "data": 1, "orderable": false},
+                    { "data": 2 },
+                    { "data": 3 },
+                    { "data": 4 },
+                    { "data": 5 },
+                    { "data": 6 },
+
                 ],
-                // "columnDefs": [
+                "order": [[1, 'asc']],
+                // // "columnDefs": [
                 //     {"targets": [0],
                 //     "visible": false,
                 //     "searchable": true},
@@ -99,9 +89,6 @@
                         var mride = row[0];
                         var cride = row[1];
                         console.log(row);
-                        var point_1 = row[7],
-                        point_2 = row[8],
-                        point_3 = row[9];
                         $.ajax({
                            'url' : '/getroutebyid',
                            'data' : JSON.stringify([cride, mride]),
@@ -175,16 +162,64 @@
                            'error' : function(error) {
                                console.log('FML ' + error);
                            }
-                        });
-                    });
-                },
-
-            });
+                        }); //end of ajax
+                    }); //end of on click
+                }, //end of fnInitComplete
+            }); //end of datatable (just before ready document)
+            //remove the show 10 entries drop down
             $('.dataTables_length').remove()
+
+            
+            //add hidden details row
+            $('#rs_entries tbody').on('click', 'td.details-control', function () {
+                // var table = $('#rs_entries').dataTable(); //fnGet methods
+                // var pos = table.fnGetPosition(this)[0]
+                // var data_dict = table.fnGetData(pos)
+
+                var table = $('#rs_entries').DataTable(); //row methods
+
+
+                // debugger;
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+
+                function format (d) {
+                    // `d` is the original data object for the row
+                    return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+                        '<tr>'+
+                            '<td>Full name:</td>'+
+                            '<td>'+ d[7] +'</td>'+
+                        '</tr>'+
+                        '<tr>'+
+                            '<td>Extension number:</td>'+
+                            '<td>'+ d[8] +'</td>'+
+                        '</tr>'+
+                        '<tr>'+
+                            '<td>Extra info:</td>'+
+                            '<td>' + d[9] + '</td>'+
+                        '</tr>'+
+                    '</table>';
+                }
+
+                
+                // debugger;
+                if ( row.child.isShown() ) {
+                    // This row is already open - close it
+                    row.child.hide();
+                    tr.removeClass('shown');
+                }
+                else {
+                    // Open this row
+                    row.child( format(row.data()) ).show();
+                    tr.addClass('shown');
+                }
+            });
         });
+        //add ride share moving path
         function get_ride_share() {
             movingPath('return_ride_share');
         }
+
     </script>
     <style>
         #map {
@@ -213,12 +248,12 @@
             font-size: 11px;
             text-align: center;
         }
-        tr td:first-child {
+        tr td:nth-child(2) {
             font-weight: bold;
             color: #00688B;
             opacity: 0.6;  
         }
-        tr td:nth-child(2) {
+        tr td:nth-child(3) {
             font-weight: bold;
             color: #009900;            
             opacity: 0.6;  
@@ -272,6 +307,16 @@
             letter-spacing: 1px;
         }
 
+        td.details-control {
+            background: url('../static/images/details_open.png') no-repeat center center;
+            cursor: pointer;
+            background-size: 50% 55%;
+        }
+        tr.shown td.details-control {
+            background: url('../static/images/details_close.png') no-repeat center center;
+            background-size: 50% 55%;
+        }
+
     </style>
 {% endblock %}
 
@@ -281,15 +326,17 @@
         <table id='rs_entries' class='table display' cellspacing="0">
             <thead>
                 <tr>
-                  <th>Current Ride</th>
-                  <th>Matched Ride</th>
-                  <th>Time (am)</th>
-                  <th>Miles Saved</th>
-                  <th>Extra Time</th>
-                  <th>Money Saved</th>
-                  <th>RideShare Score</th>
+                    <th></th>
+                    <th>Current Ride</th>
+                    <th>Matched Ride</th>
+                    <th>Time (am)</th>
+                    <th>Miles Saved</th>
+                    <th>Extra Time</th>
+                    <th>Money Saved</th>
+                    <th>RideShare Score</th>
                 </tr>
           </thead>
+
         </table>
     </div>
     <div>
