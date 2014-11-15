@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+    {{ super() }}
+    <link href="../static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/js/jquery-ui-1.11.2/jquery-ui.css">
+    <script src="../static/js/jquery-ui-1.11.2/jquery-ui.js"></script>
+    <script src="../static/js/jquery-1.11.1.min.js"></script>
+    <style type="text/css">
+        .important { color: #336699; }
+        .error {background-color: #f2dede;}
+        .table {border: 1px;}
+        .table thead tr th {text-align: center;}
+        button {
+            background-color: transparent;
+            border: none;
+            padding: 0;
+            margin-left: 10px;
+        }
+        .tog {
+            display: none;
+        }
+    </style>
+  <script>
+  $(function() {
+    $( "#sortable1, #sortable2" ).sortable({
+      connectWith: ".connectedSortable"
+    }).disableSelection();
+  });
+  </script>
+{% endblock %}
+
+{% block content %}
+    <div class="starter-template">
+        <table class="table">
+            <thead>
+              <tr>
+                <th>Event Name</th>
+              </tr>
+            </thead>
+            {% for item in entries %}
+                {% if item < 3 %}
+                    <tr class='error'>
+                        <td> {{item}} <button class='glyphicon glyphicon-circle-arrow-down'></button> <p class='tog'>test</p></td>
+                    </tr>
+                {% elif item > 7 %}
+                    <tr class='info'>
+                        <td> {{item}} <button class='glyphicon glyphicon-circle-arrow-down'></button> <p class='tog'>test</p></td>
+                    </tr>
+                {% else %}
+                    <tr class=''>
+                        <td> {{item}} <button class='glyphicon glyphicon-circle-arrow-down'></button> <p class='tog'>test</p></td>
+                    </tr>
+                {% endif %}
+            {% endfor%}
+        </table>
+        <!-- <h1></h1> -->
+<!--         <p class="important">
+            Welcome on my awesome homepage.
+        </p>
+ -->
+    <!-- <p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a mostly barebones HTML document.</p> -->
+    </div>
+    <script>
+        $( "button" ).click(function() {
+            $( "p" ).toggle();
+        });
+    </script>
+
+
+{% endblock %}

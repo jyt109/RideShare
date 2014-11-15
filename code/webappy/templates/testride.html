@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% block title %}RideViz{% endblock %}
+{% block head %}
+    {{ super() }}
+        <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.css">
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.4/js/jquery.dataTables.js"></script>
+   
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+
+    <script>
+        function parse_to_float(data) {
+            var lst = [];
+            for (var i=0; i < data.length; i++) {
+                //console.log(data[i])
+                lst.push(data[i].map(parseFloat));
+            }
+            return lst
+        }
+
+        function click_to_remove() {
+            map.removeLayer(cline);
+            map.removeLayer(mline);
+            map.removeLayer(start_blue_mark);
+            map.removeLayer(end_blue_mark);
+            map.removeLayer(start_green_mark);
+            map.removeLayer(end_green_mark);
+            $('.leaflet-zoom-hide').remove()
+        }
+
+        //calling data to map
+        $(document).ready(function(){
+            $('#rs_entries').dataTable({
+                'ajax': {
+                    'url': 'readjson',
+                    'type': 'POST'
+                },
+                "bFilter": false,
+                "bAutoWidth": false,
+                "aoColumns" : [
+                    { sWidth: '30px' },
+                    { sWidth: '30px' },
+                    { sWidth: '30px' },
+                    { sWidth: '30px' },
+                    { sWidth: '50px' },
+                    { sWidth: '30px' }
+                ],
+                // "columnDefs": [
+                //     {"targets": [0],
+                //     "visible": false,
+                //     "searchable": true},
+                //     {"targets": [1],
+                //     "visible": false,
+                //     "searchable":true}
+                // ],
+                "fnInitComplete" : function (oSettings,json) {
+                    $("#rs_entries").find('tr').click( function( e ) {
+                        var table = $('#rs_entries').dataTable();
+                        var pos = table.fnGetPosition(this);
+                        var row = table.fnGetData()[pos];
+                        var mride = row[0];
+                        var cride = row[1];
+                        console.log(row);
+                        $.ajax({
+                           'url' : '/getroutebyid',
+                           'data' : JSON.stringify([cride, mride]),
+                           'type' : 'POST',
+                           'contentType' : 'application/json',
+                           'success' : function(data) {
+                                //disable button to get share ride 
+                                //still the last shared ride, hasn't been updated
+                                $("button").prop("disabled",true);
+                                //setTimeout(continueExecution, 5000)
+                                // Remove the route on the map
+                                if (typeof(cline) !== 'undefined') {
+                                    click_to_remove();
+                                    //remove shared ride as well
+                                }
+
+                                console.log('Receive routes');
+                                var json_data = JSON.parse(data);
+                                var croute = parse_to_float(json_data[0]),
+                                mroute = parse_to_float(json_data[1]);
+                                //plot routes on map 2700, 2077
+                                var m_len = mroute.length,
+                                c_len = croute.length;
+                                var mid_point = Math.round((m_len + c_len) /2)
+                                if (mroute.length > croute.length) {
+                                    var longer_route = mroute;
+                                } else {
+                                    var longer_route = croute;
+                                }
+                                window.cline = L.polyline(croute, {'color': 'blue', 
+                                                                'weight': 6}).addTo(map);
+                                window.mline = L.polyline(mroute, {'color': 'green', 
+                                                                'weight': 6}).addTo(map);
+                                map.setView(longer_route[mid_point], 12);
+
+                                // debugger;
+                                //blue is current, green is mathched
+                                var start_blue = croute[0],
+                                end_blue = croute[c_len - 1],
+                                start_green = mroute[0],
+                                end_green = mroute[m_len - 1];
+
+                                var blue_attrs = {'color': 'blue', 'opacity': 0.8, 'radius': 5, 'fill': true, 'fillOpacity': 0.8},
+                                green_attrs = {'color': 'green', 'opacity': 0.8, 'radius': 5, 'fill': true, 'fillOpacity': 0.8};
+
+                                window.start_blue_mark = L.circleMarker(start_blue, blue_attrs).addTo(map);
+                                window.end_blue_mark = L.circleMarker(end_blue, blue_attrs).addTo(map);
+
+                                window.start_green_mark = L.circleMarker(start_green, green_attrs).addTo(map);
+                                window.end_green_mark = L.circleMarker(end_green, green_attrs).addTo(map);
+
+
+                                //make multiple popup open together
+                                function marker_pop_bind(marker, content) {
+                                    marker.bindPopup(content, {'closeButton': false, 'minWidth': 0, 'maxHeight': 20});
+                                    marker.openPopup();
+                                }//marker_pop_bind
+
+                                marker_pop_bind(start_blue_mark, '<div class="bluem">Start 2</div>');
+                                marker_pop_bind(end_blue_mark, '<div class="bluem">End 2</div>');
+
+                                marker_pop_bind(start_green_mark, '<div class="greenm">Start 1</div>');
+                                marker_pop_bind(end_green_mark, '<div class="greenm">End 1</div>');
+                                //re-enable button after the shared path has been set right 
+                                //to allow the moving path to be called again
+                                $("button").prop("disabled",false);
+
+                            }, //success
+                           'error' : function(error) {
+                               console.log('FML ' + error);
+                           }
+                        });
+                    });
+                },
+
+            });
+            $('.dataTables_length').remove()
+        });
+        function get_ride_share() {
+            movingPath('return_ride_share');
+        }
+    </script>
+    <style>
+        #map {
+            height: 470px;
+            width: 600px;
+            float: left;
+        }
+
+        .table {
+            width: 100%;
+            height: 100%;
+        }
+        .table tbody tr:hover {
+            cursor: pointer;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(70, 130, 180, 0.1); 
+        }
+        .main_container {
+            width: 1130px;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            margin-left: auto ;
+            margin-right: auto ;
+        }
+        tr td {
+            font-size: 11px;
+            text-align: center;
+        }
+        tr td:first-child {
+            font-weight: bold;
+            color: #00688B;
+            opacity: 0.6;  
+        }
+        tr td:nth-child(2) {
+            font-weight: bold;
+            color: #009900;            
+            opacity: 0.6;  
+        }
+        th {
+            text-align: center;
+            font-size: 11px;
+        }
+        .dataTables_info {
+            font-size: 11px;
+            opacity: 0.4;
+        }
+        .pagination>li>a, .pagination>li>span {
+            padding: 4px 9px;
+            font-size: 11px;
+        }
+        #tab { /* table div container */
+            float: left;
+            margin-left: 50px;
+        }
+        .bluem, .greenm {
+            font-weight: bold;
+        }
+        .bluem {
+            color: #00688B;
+        }
+        .greenm {
+            color: #009900;
+        }
+
+        .leaflet-popup-content-wrapper,
+        .leaflet-popup-tip {
+            box-shadow: 0;
+            opacity: 0.6;
+            height: 20px;
+            padding-top: 0;
+        }
+
+        .leaflet-popup-tip {
+            width: 5px;
+        }
+        .route_btn {
+            margin-left: 220px;
+            margin-top: 20px;
+            float: left;
+            font-size: 16px;
+            padding-left: 10px;
+            padding-right: 10px;
+            background-color: #FF3333;
+            opacity: 0.9;
+            letter-spacing: 1px;
+        }
+
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id='map'></div>
+    <div id="tab">
+        <table id='rs_entries' class='table display' cellspacing="0">
+            <thead>
+                <tr>
+                  <th>Current Ride</th>
+                  <th>Matched Ride</th>
+                  <th>Time (am)</th>
+                  <th>Miles Saved</th>
+                  <th>Extra Time</th>
+                  <th>Money Saved</th>
+                </tr>
+          </thead>
+        </table>
+    </div>
+    <div>
+        <button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share&nbsp!</button>
+    </div>
+{% endblock %}
+
+{% block add_script %}
+   <script>
+        L.Map = L.Map.extend({
+            openPopup: function(popup) {
+                //        this.closePopup();  // just comment this
+                this._popup = popup;
+
+                return this.addLayer(popup).fire('popupopen', {
+                    popup: this._popup
+                });
+            }
+        }); /***  end of hack ***/
+        var man_center = [40.77644678131695, -73.97214889526367];
+        var man_northEast = [40.79269390809278, -73.94210815429688],
+        man_southWest = [40.760195680104694, -74.00218963623047],
+        man_bounds = [man_southWest, man_northEast];
+
+        map = new L.Map('map', {center: man_center,  minZoom: 12, maxZoom: 16, detectRetina: true}); //, maxBounds: man_bounds
+        osmTile = "http://tile.openstreetmap.org/{z}/{x}/{y}.png";
+        osmCopyright = "Map data &copy; 2012 OpenStreetMap contributors";
+        osmLayer = new L.TileLayer(osmTile, {attribution: osmCopyright, opacity: 0.8}); //, bounds: man_bounds
+        map.addLayer(osmLayer);
+        map.setView(man_center, 13);
+    </script>
+{% endblock %}
+

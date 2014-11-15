@@ -1,0 +1,33 @@
+svg {
+    position: relative;
+}
+path {
+    fill: yellow;
+    stroke-width: 2px;
+    stroke: #FF3333;
+    stroke-opacity: 1;
+}
+.travelMarker {
+    fill: yellow;
+    opacity: 0.6;
+}
+.waypoints {
+    fill: #FF3333;
+    opacity: 0;
+}
+
+.drinks {
+    stroke: black;
+    fill: #FF3333;
+}
+.lineConnect {
+    fill: none;
+    stroke: #FF3333;
+    opacity: 0.8;
+}
+.locnames {
+    fill: black;
+    text-shadow: 1px 1px 1px #FFF, 3px 3px 5px #000;
+    font-weight: bold;
+    font-size: 13px;
+}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}RideViz{% endblock %}
+{% block head %}
+    <script src="../static/js/jquery-1.11.1.min.js"></script>
+    <script src="../static/js/jquery-ui-1.11.2/jquery-ui.js"></script>
+    <script src="../static/js/d3.min.js"></script>
+    {{ super() }}
+    <link href="../static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/js/jquery-ui-1.11.2/jquery-ui.css">
+    <style>
+        .start {
+        }
+        .end {
+        }
+        .one {
+            fill:lightblue;
+            stroke: #999999;
+        }
+        .two {
+            fill:#CD5555;
+            stroke: #999999;
+        }
+
+
+        .main_container {
+            width: 1000px;
+            padding-top: 100px;
+            padding-bottom: 100px;
+            margin-left: auto ;
+            margin-right: auto ;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+{% endblock %}
+
+{% block add_script %}
+   <script>
+        // Create the SVG
+        var svg = d3.select(".main_container").append("svg")
+          .attr("width", 700)
+          .attr("height", 400)
+          .attr("border", 1)
+          .on("click", click);
+        // Add a background
+        svg.append("rect")
+          .attr("width", 700)
+          .attr("height", 400)
+          .style("stroke", "#999999")
+          .style("fill", "#F6F6F6")
+
+             // Define drag beavior
+        var drag = d3.behavior.drag()
+            .on("drag", dragmove);
+
+        function dragmove(d) {
+          var x = d3.event.x;
+          var y = d3.event.y;
+          d3.select(this).attr("cx", x).attr("cy", y);
+        }
+
+        var start1 = {name: 'start one', lati: 100, longi: 100},
+        start2  = {name: 'start two', lati: 200, longi: 200},
+        end1  = {name: 'end one', lati: 300, longi: 200},
+        end2  = {name: 'end two', lati: 250, longi: 200};
+
+        function addCircle(svg, d) {
+            var startEnd12 = d.name
+            svg.append("circle")
+            .attr("class", "dot " + startEnd12)
+            .attr("r", 5)
+            .attr("cx", d.longi)
+            .attr("cy", d.lati)
+            .style("cursor", "pointer")
+            .call(drag);
+        }
+
+        addCircle(svg, start1);
+        addCircle(svg, start2);
+        addCircle(svg, end1);
+        addCircle(svg, end2);
+
+
+        function getPos(class1, class2) {
+            var selected = d3.select("." + class1 + "." + class2);
+            var sx = selected.attr("cx");
+            var sy = selected.attr("cy");
+            return[sx, sy];
+        }
+
+        function click(){if (d3.event.defaultPrevented) return;}
+
+
+    </script>
+{% endblock %}
+

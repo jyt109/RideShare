@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}RideViz{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style>
+        .main_container {
+            width: 1000px;
+            padding-top: 100px;
+            padding-bottom: 100px;
+            margin-left: auto ;
+            margin-right: auto ;
+        }
+        #map {
+            height: 500px;
+            width: 700px;
+            float: left;
+        }
+        .awesome-marker i {
+            font-size: 14px;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+        .awesome-marker-icon-darkred,
+        .awesome-marker-icon-cadetblue {
+            opacity: 0.7;
+        }
+        .btn {
+            margin-left: 30px;
+            float: left;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id='map'></div>
+      <div>
+        <button onClick="getPos()" type="submit" name="submit" class="btn btn-info">Get Me Route</button>
+     </div>
+
+{% endblock %}
+
+{% block add_script %}
+   <script>
+        var man_center = [40.77644678131695, -73.97214889526367];
+        var man_northEast = [40.79269390809278, -73.94210815429688],
+        man_southWest = [40.760195680104694, -74.00218963623047],
+        man_bounds = [man_southWest, man_northEast];
+
+        map = new L.Map('map', {center: man_center,  minZoom: 14, maxZoom: 16});//maxBounds: man_bounds,
+        osmTile = "http://tile.openstreetmap.org/{z}/{x}/{y}.png";
+        osmCopyright = "Map data &copy; 2012 OpenStreetMap contributors";
+        osmLayer = new L.TileLayer(osmTile, {attribution: osmCopyright, opacity: 0.8, });//bounds: man_bounds
+        map.addLayer(osmLayer);
+        map.setView(man_center, 14);
+
+        var polygon = L.polygon([
+            [40.780021490225955, -73.9614200592041],
+            [40.77488684805401, -73.96116256713867]
+        ]).addTo(map);
+
+        function makeMarker(glyph, shape, col, pos, map) {
+            var micon = L.AwesomeMarkers.icon({
+                            prefix: glyph,
+                            icon: shape,
+                            markerColor: col});
+            return(L.marker(pos, {icon: micon, draggable: true}).addTo(map))
+        };
+        var oneStart = [40.780021490225955, -73.9614200592041],
+        oneDest = [40.78567563696272, -73.97832870483398],
+        twoStart = [40.77488684805401, -73.96116256713867],
+        twoDest = [40.78476580676563, -73.98287773132324]
+
+        var oneStartMark = makeMarker('glyphicon', 'user', 'darkred', oneStart, map);
+        var oneDestMark = makeMarker('glyphicon', 'home', 'darkred', oneDest, map);
+        var twoStartMark = makeMarker('glyphicon', 'user', 'cadetblue', twoStart, map);
+        var twoDestMark = makeMarker('glyphicon', 'home', 'cadetblue', twoDest, map);
+
+        function markerPos(marker) {
+            return([marker.getLatLng().lat, marker.getLatLng().lng])
+        };
+
+        function plotRoutes() {
+            console.log('plot called');
+            movingPath('mapone');
+            movingPath('maptwo');
+        };
+
+        function getPos() {
+           var oneStartPos = markerPos(oneStartMark),
+            oneDestPos = markerPos(oneDestMark),
+            twoStartPos = markerPos(twoStartMark),
+            twoDestPos = markerPos(twoDestMark)
+            ret = [oneStartPos, oneDestPos, twoStartPos, twoDestPos];
+            console.log(Date.now())
+            console.log(ret[0])
+            $.ajax({
+                type : 'POST',
+                url: "map",
+                contentType : 'application/json',
+                data : JSON.stringify(ret)
+            }).success(
+                function(jsonData) {
+                   plotRoutes();
+                }); 
+            };
+    </script>
+{% endblock %}
+

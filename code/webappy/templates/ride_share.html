@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% block title %}RideViz - RideShare{% endblock %}
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.css">
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.4/js/jquery.dataTables.js"></script>
+   
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+
+
+
+    <script>
+    $(document).ready(function(){
+        $('#rs_entries').DataTable({
+            "columnDefs" : [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                },
+                {
+                    "targets": [1],
+                    "visible": false,
+                    "searchable": false
+                }
+            ]
+        });
+    });
+    </script>
+    <style>
+        .table {
+            width: 700px;
+            height: 300px;
+        }
+
+
+    </style>
+{% endblock %}
+
+{% block content %}
+  <table id='rs_entries' class='table'>
+  <thead>
+    <tr style="text-align: right;">
+      <th>mride</th>
+      <th>c_ride</th>
+      <th>Time (am)</th>
+      <th>Miles Saved</th>
+      <th>Extra Time</th>
+      <th>Money Saved</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td> 14030</td>
+      <td> 13603</td>
+      <td> 08:48:22</td>
+      <td> 3.8</td>
+      <td>  2 min 1 sec</td>
+      <td> $10.01</td>
+    </tr>
+    <tr>
+      <td> 14710</td>
+      <td> 14462</td>
+      <td> 08:51:33</td>
+      <td> 3.8</td>
+      <td> 0 min 53 sec</td>
+      <td> $10.03</td>
+    </tr>
+    <tr>
+      <td>  9865</td>
+      <td>  9687</td>
+      <td> 08:34:05</td>
+      <td> 3.8</td>
+      <td> 4 min 11 sec</td>
+      <td> $10.10</td>
+    </tr>
+    <tr>
+      <td>  9204</td>
+      <td>  8978</td>
+      <td> 08:31:47</td>
+      <td> 3.8</td>
+      <td> 3 min 20 sec</td>
+      <td> $10.11</td>
+    </tr>
+    <tr>
+      <td> 11109</td>
+      <td> 10594</td>
+      <td> 08:37:29</td>
+      <td> 3.8</td>
+      <td> 2 min 42 sec</td>
+      <td> $10.11</td>
+    </tr>
+    <tr>
+      <td> 15204</td>
+      <td> 14697</td>
+      <td> 08:52:27</td>
+      <td> 3.9</td>
+      <td> 1 min 56 sec</td>
+      <td> $10.25</td>
+    </tr>
+    <tr>
+      <td> 15753</td>
+      <td> 15331</td>
+      <td> 08:54:42</td>
+      <td> 3.9</td>
+      <td> 1 min 50 sec</td>
+      <td> $10.25</td>
+    </tr>
+    <tr>
+      <td>  2700</td>
+      <td>  2077</td>
+      <td> 08:07:00</td>
+      <td> 3.9</td>
+      <td> 2 min 36 sec</td>
+      <td> $10.25</td>
+    </tr>
+    <tr>
+      <td> 12230</td>
+      <td> 11798</td>
+      <td> 08:41:54</td>
+      <td> 3.9</td>
+      <td> 1 min 25 sec</td>
+      <td> $10.31</td>
+    </tr>
+    <tr>
+      <td>  3662</td>
+      <td>  3087</td>
+      <td> 08:10:33</td>
+      <td> 3.9</td>
+      <td> 4 min 29 sec</td>
+      <td> $10.34</td>
+    </tr>
+    <tr>
+      <td> 12608</td>
+      <td> 12109</td>
+      <td> 08:43:00</td>
+      <td> 3.9</td>
+      <td> 0 min 55 sec</td>
+      <td> $10.36</td>
+    </tr>
+    <tr>
+      <td>  8767</td>
+      <td>  8615</td>
+      <td> 08:30:05</td>
+      <td> 3.9</td>
+      <td> 2 min 18 sec</td>
+      <td> $10.37</td>
+    </tr>
+    <tr>
+      <td>  3299</td>
+      <td>  3217</td>
+      <td> 08:11:00</td>
+      <td> 3.9</td>
+      <td> 4 min 30 sec</td>
+      <td> $10.39</td>
+    </tr>
+    <tr>
+      <td> 13801</td>
+      <td> 13217</td>
+      <td> 08:47:00</td>
+      <td> 4.0</td>
+      <td> 3 min 57 sec</td>
+      <td> $10.40</td>
+    </tr>
+    <tr>
+      <td>  7988</td>
+      <td>  7605</td>
+      <td> 08:26:46</td>
+      <td> 4.0</td>
+      <td> 0 min 18 sec</td>
+      <td> $10.40</td>
+    </tr>
+    <tr>
+      <td>  2019</td>
+      <td>  1982</td>
+      <td> 08:07:00</td>
+      <td> 3.9</td>
+      <td>  3 min 9 sec</td>
+      <td> $10.40</td>
+    </tr>
+    <tr>
+      <td>  5188</td>
+      <td>  4884</td>
+      <td> 08:16:49</td>
+      <td> 4.0</td>
+      <td> 5 min 13 sec</td>
+      <td> $10.42</td>
+    </tr>
+    <tr>
+      <td> 16463</td>
+      <td> 16053</td>
+      <td> 08:57:27</td>
+      <td> 4.0</td>
+      <td> 2 min 28 sec</td>
+      <td> $10.45</td>
+    </tr>
+    <tr>
+      <td>  3179</td>
+      <td>  3255</td>
+      <td> 08:11:00</td>
+      <td> 4.0</td>
+      <td> 0 min 53 sec</td>
+      <td> $10.47</td>
+    </tr>
+    <tr>
+      <td>  3255</td>
+      <td>  3179</td>
+      <td> 08:11:00</td>
+      <td> 4.0</td>
+      <td> 0 min 46 sec</td>
+      <td> $10.53</td>
+    </tr>
+  </tbody>
+</table>
+    <div id='map'></div>
+{% endblock %}
+
+{% block add_script %}
+  <script>
+    var man_center = [40.77644678131695, -73.97214889526367];
+    var man_northEast = [40.79269390809278, -73.94210815429688],
+    man_southWest = [40.760195680104694, -74.00218963623047],
+    man_bounds = [man_southWest, man_northEast];
+
+    map = new L.Map('map', {center: man_center,  minZoom: 14, maxZoom: 16});//maxBounds: man_bounds,
+    osmTile = "http://tile.openstreetmap.org/{z}/{x}/{y}.png";
+    osmCopyright = "Map data &copy; 2012 OpenStreetMap contributors";
+    osmLayer = new L.TileLayer(osmTile, {attribution: osmCopyright, opacity: 0.8, });//bounds: man_bounds
+    map.addLayer(osmLayer);
+    map.setView(man_center, 14);
+  </script>
+
+{% endblock %}
