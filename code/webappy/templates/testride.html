@@ -52,25 +52,27 @@
                     'url': 'readjson',
                     'type': 'POST'
                 },
+                "iDisplayLength": 5,
                 "bFilter": false,
                 "bAutoWidth": false,
                 "columns": [
-                    {
-                        "class":  'details-control',
-                        "orderable":      false,
-                        "data":           null,
-                        "defaultContent": ''
-                    },
+                    // {
+                    //     "class":  'details-control',
+                    //     "orderable":      false,
+                    //     "data":           null,
+                    //     "defaultContent": ''
+                    // },
+                    //{ "data": 0, "orderable": false},
                     { "data": 0, "orderable": false},
-                    { "data": 1, "orderable": false},
+                    { "data": 1, "orderable": false },
                     { "data": 2 },
                     { "data": 3 },
                     { "data": 4 },
                     { "data": 5 },
-                    { "data": 6 },
+                    { "data": 6 } 
 
                 ],
-                "order": [[1, 'asc']],
+                "order": [[1, 'asc'], [2, 'asc']],
                 // // "columnDefs": [
                 //     {"targets": [0],
                 //     "visible": false,
@@ -80,15 +82,51 @@
                 //     "searchable":true}
                 // ],
                 "fnInitComplete" : function (oSettings,json) {
-                    $("#rs_entries").on('click', 'tr', function( e ) {
-                        $('#rs_entries').find('tr').css('background-color', 'white');
-                        $(this).css('background-color', 'rgba(70, 130, 180, 0.1)');
-                        var table = $('#rs_entries').dataTable();
-                        var pos = table.fnGetPosition(this);
-                        var row = table.fnGetData()[pos];
-                        var mride = row[0];
-                        var cride = row[1];
-                        console.log(row);
+                    $("#rs_entries").on('click', 'tbody tr', function( e ) {
+                        //set the background color
+                        $('#rs_entries').find('tbody tr').css('background-color', 'white');
+                        $(this).css('background-color', 'rgba(70, 130, 180, 0.2)');
+                        
+                        //remove any previous extra info tables and add in the new one
+                        var table1 = $('#rs_entries').DataTable(); //row methods
+                        var tr = $(this).closest('tr'); //return dom
+                        var row1 = table1.row(tr); //return data
+                        function format (d) {
+                            // `d` is the original data object for the row
+                            return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+                                '<tr>'+
+                                    '<td>Full name:</td>'+
+                                    '<td>'+ d[7] +'</td>'+
+                                '</tr>'+
+                                '<tr>'+
+                                    '<td>Extension number:</td>'+
+                                    '<td>'+ d[8] +'</td>'+
+                                '</tr>'+
+                                '<tr>'+
+                                    '<td>Extra info:</td>'+
+                                    '<td>' + d[9] + '</td>'+
+                                '</tr>'+
+                            '</table>';
+                        }
+                
+                        if ( row1.child.isShown() ) {
+                            row1.child.hide();
+                            tr.removeClass('shown');
+                        }
+                        else {
+                            $('tr.shown + tr').remove();
+                            $('tr.shown').removeClass('shown');
+                            row1.child( format(row1.data()) ).show();
+                            tr.addClass('shown');
+                        }
+
+                        //get row data
+                        var table2 = $('#rs_entries').dataTable();
+                        var pos = table2.fnGetPosition(this);
+                        var row2 = table2.fnGetData()[pos];
+                        var mride = row2[0];
+                        var cride = row2[1];
+                        console.log(row2);
                         $.ajax({
                            'url' : '/getroutebyid',
                            'data' : JSON.stringify([cride, mride]),
@@ -96,14 +134,12 @@
                            'contentType' : 'application/json',
                            'success' : function(data) {
                                 //disable button to get share ride 
-                                //still the last shared ride, hasn't been updated
+                                //until the current row of rides are registered
                                 $("button").prop("disabled",true);
-                                // Remove the route on the map
+                                // Remove the route on the map and the shared moving path
                                 if (typeof(cline) !== 'undefined') {
                                     click_to_remove();
-                                    //remove shared ride as well
                                 }
-
                                 console.log('Receive routes');
                                 var json_data = JSON.parse(data);
                                 var croute = parse_to_float(json_data[0]),
@@ -122,7 +158,6 @@
                                 window.mline = L.polyline(mroute, {'color': 'green', 
                                                                 'weight': 6}).addTo(map);
                                 map.setView(longer_route[mid_point], 12);
-
                                 //blue is current, green is mathched
                                 var start_blue = croute[0],
                                 end_blue = croute[c_len - 1],
@@ -138,7 +173,6 @@
                                 window.start_green_mark = L.circleMarker(start_green, green_attrs).addTo(map);
                                 window.end_green_mark = L.circleMarker(end_green, green_attrs).addTo(map);
 
-
                                 //make multiple popup open together
                                 function marker_pop_bind(marker, content) {
                                     marker.bindPopup(content, {'closeButton': false, 
@@ -147,7 +181,6 @@
                                                                 'closeOnClick': false});
                                     marker.openPopup();
                                 }//marker_pop_bind
-
                                 marker_pop_bind(start_blue_mark, '<div class="bluem">Start 1</div>');
                                 marker_pop_bind(end_blue_mark, '<div class="bluem">End 1</div>');
 
@@ -167,63 +200,20 @@
             }); //end of datatable (just before ready document)
             //remove the show 10 entries drop down
             $('.dataTables_length').remove()
-
-            
-            //add hidden details row
-            $('#rs_entries tbody').on('click', 'td.details-control', function () {
-                // var table = $('#rs_entries').dataTable(); //fnGet methods
-                // var pos = table.fnGetPosition(this)[0]
-                // var data_dict = table.fnGetData(pos)
-                console.log('sddsd');
-                var table = $('#rs_entries').DataTable(); //row methods
-                var tr = $(this).closest('tr');
-                var row = table.row(tr);
-                var rows = table.row();
-                function format (d) {
-                    // `d` is the original data object for the row
-                    return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
-                        '<tr>'+
-                            '<td>Full name:</td>'+
-                            '<td>'+ d[7] +'</td>'+
-                        '</tr>'+
-                        '<tr>'+
-                            '<td>Extension number:</td>'+
-                            '<td>'+ d[8] +'</td>'+
-                        '</tr>'+
-                        '<tr>'+
-                            '<td>Extra info:</td>'+
-                            '<td>' + d[9] + '</td>'+
-                        '</tr>'+
-                    '</table>';
-                }
-
-                
-                if ( row.child.isShown() ) {
-                    // This row is already open - close it
-
-                    row.child.hide();
-                    tr.removeClass('shown');
-                }
-                else {
-                    // Open this row
-                    $('tr.shown + tr').remove()
-                    $('tr.shown').removeClass('shown')
-                    row.child( format(row.data()) ).show();
-                    tr.addClass('shown');
-                }
-            });
-        });
+            //remove the annoying purple arrow in the th cells
+            $('.sorting_asc').removeClass('sorting_asc');
+        }); //document ready end
         //add ride share moving path
         function get_ride_share() {
             movingPath('return_ride_share');
-        }
-
+        } 
     </script>
     <style>
         #map {
             height: 450px;
-            width: 600px;
+            width: 570px;
             float: left;
+            margin-left: 30px;
         }
 
         .table {
@@ -244,37 +234,37 @@
             margin-right: auto ;
         }
         tr td {
-            font-size: 11px;
+            font-size: 12px;
             text-align: center;
         }
-        tr td:nth-child(2) {
+        tr td:nth-child(1) {
             font-weight: bold;
             color: #00688B;
             opacity: 0.6;  
         }
-        tr td:nth-child(3) {
+        tr td:nth-child(2) {
             font-weight: bold;
             color: #009900;            
             opacity: 0.6;  
         }
         th {
             text-align: center;
-            font-size: 11px;
+            font-size: 12px;
         }
         .dataTables_info {
-            font-size: 11px;
+            font-size: 12px;
             opacity: 0.4;
         }
         div.dataTables_paginate ul.pagination {
-            margin: 0px 0px 0px -100px;
+            margin: 5px 0px 0px -100px;
         }
         .pagination>li>a, .pagination>li>span {
             padding: 4px 9px;
-            font-size: 11px;
+            font-size: 12px;
         }
         #tab { /* table div container */
             float: left;
-            margin-left: 50px;
+            margin-left: 30px;
         }
         .bluem, .greenm {
             font-weight: bold;
@@ -298,7 +288,7 @@
             width: 5px;
         }
         .route_btn {
-            margin-left: 220px;
+            margin-left: 270px;
             margin-top: 20px;
             float: left;
             font-size: 16px;
@@ -312,16 +302,16 @@
         td.details-control {
             background: url('../static/images/details_open.png') no-repeat center center;
             cursor: pointer;
-            background-size: 50% 65%;
+            background-size: 60% 65%;
         }
         tr.shown td.details-control {
             background: url('../static/images/details_close.png') no-repeat center center;
-            background-size: 50% 65%;
+            background-size: 60% 65%;
         }
         .table>thead>tr>th, .table>tbody>tr>th,
         .table>tfoot>tr>th, .table>thead>tr>td,
          .table>tbody>tr>td, .table>tfoot>tr>td {
-            padding: 6px;
+            padding: 8px;
          }
 
     </style>
@@ -333,7 +323,6 @@
         <table id='rs_entries' class='table display' cellspacing="0">
             <thead>
                 <tr>
-                    <th></th>
                     <th>Current<br>Ride</th>
                     <th>Matched<br>Ride</th>
                     <th>Time<br>(am)</th>
@@ -347,7 +336,7 @@
         </table>
     </div>
     <div>
-        <button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share&nbsp!</button>
+        <button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share</button>
     </div>
 {% endblock %}
 
