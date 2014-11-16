@@ -3,9 +3,8 @@
 {% block head %}
     {{ super() }}
         <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.css">
-    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.4/js/jquery.dataTables.js"></script>
-   
-    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+        <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.4/js/jquery.dataTables.js"></script>
+        <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.js"></script>
 
     <script>
         function parse_to_float(data) {
@@ -26,8 +25,26 @@
             $('.leaflet-zoom-hide').remove()
         }
 
+        //search box
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                var min = parseInt( $('#min').val(), 10 );
+                var max = parseInt( $('#max').val(), 10 );
+                var age = parseFloat( data[6] ) || 0; // use data for the age column
+                debugger;
+                if ( ( isNaN( min ) && isNaN( max ) ) ||
+                     ( isNaN( min ) && age <= max ) ||
+                     ( min <= age   && isNaN( max ) ) ||
+                     ( min <= age   && age <= max ) )
+                {
+                    return true;
+                }
+                return false;
+            }
+        );
+
         //calling data to map
-        $(document).ready(function(){
+        $(document).ready(function(){  
             $('#rs_entries').DataTable({
                 'ajax': {
                     'url': 'readjson',
@@ -37,13 +54,6 @@
                 "bFilter": false,
                 "bAutoWidth": false,
                 "columns": [
-                    // {
-                    //     "class":  'details-control',
-                    //     "orderable":      false,
-                    //     "data":           null,
-                    //     "defaultContent": ''
-                    // },
-                    //{ "data": 0, "orderable": false},
                     { "data": 0, "orderable": false},
                     { "data": 1, "orderable": false },
                     { "data": 2 },
@@ -54,14 +64,6 @@
 
                 ],
                 "order": [[1, 'asc'], [2, 'asc']],
-                // // "columnDefs": [
-                //     {"targets": [0],
-                //     "visible": false,
-                //     "searchable": true},
-                //     {"targets": [1],
-                //     "visible": false,
-                //     "searchable":true}
-                // ],
                 "fnInitComplete" : function (oSettings,json) {
                     $("#rs_entries").on('click', 'tbody tr', function( e ) {
                         //set the background color
@@ -179,8 +181,17 @@
                     }); //end of on click
                 }, //end of fnInitComplete
             }); //end of datatable (just before ready document)
+            
+            var table = $('#rs_entries').DataTable();
+            // Event listener to the two range filtering inputs to redraw on input
+            $('#min, #max').keyup( function() {
+                console.log('keyup');
+                table.draw();
+            } );
+
             //remove the show 10 entries drop down
-            $('.dataTables_length').remove()
+            $('.dataTables_length').remove();
+
         }); //document ready end
         //add ride share moving path
         function get_ride_share() {
@@ -293,9 +304,14 @@
         }
         .table>thead>tr>th, .table>tbody>tr>th,
         .table>tfoot>tr>th, .table>thead>tr>td,
-         .table>tbody>tr>td, .table>tfoot>tr>td {
+        .table>tbody>tr>td, .table>tfoot>tr>td {
             padding: 8px;
-         }
+        }
+        .form-control {
+            height: 25px;
+            font-size: 11px;
+            font-weight: normal;
+        }
 
     </style>
 {% endblock %}
@@ -303,20 +319,31 @@
 {% block content %}
     <div id='map'></div>
     <div id="tab">
-        <table id='rs_entries' class='table display' cellspacing="0">
-            <thead>
+        <div id='forms'></div>
+            <table border="0" cellspacing="5" cellpadding="5">
                 <tr>
-                    <th>Current<br>Ride</th>
-                    <th>Matched<br>Ride</th>
-                    <th>Time<br>(am)</th>
-                    <th>Miles<br>Saved</th>
-                    <th>Extra<br>Time</th>
-                    <th>Money<br>Saved</th>
-                    <th>RideShare<br>Score</th>
+                    <td>Minimum age:</td>
+                    <td><input type="text" id="min" name="min"></td>
                 </tr>
-          </thead>
+                <tr>
+                    <td>Maximum age:</td>
+                    <td><input type="text" id="max" name="max"></td>
+                </tr>
+            </table>
 
-        </table>
+            <table id='rs_entries' class='table display' cellspacing="0">
+                <thead>
+                    <tr>
+                        <th><p>Current<br>Ride</p></th>
+                        <th><p>Matched<br>Ride</p></th>
+                        <th><p>Time<br>(am)</p></th>
+                        <th><p>Miles<br>Saved</p></th>
+                        <th><p>Extra<br>Time</p></th>
+                        <th><p>Money<br>Saved</p></th>
+                        <th><p>RideShare<br>Score</p></th>
+                    </tr>
+                </thead>
+            </table>
     </div>
     <div>
         <button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share</button>
