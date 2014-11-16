@@ -52,8 +52,8 @@
                 ],
                 "fnInitComplete" : function (oSettings,json) {
                     // remove the loading pandas
-                    $('#loading').removeClass('work');
-                    $("#rs_entries").on('click', 'tbody tr', function( e ) {
+                    //$('#loading').removeClass('work');
+                    $("#rs_entries").on('click', 'tbody tr.odd, tbody tr.even', function( e ) {
                         //set the background color
                         $('#rs_entries').find('tbody tr').css('background-color', 'white');
                         $(this).css('background-color', 'rgba(70, 130, 180, 0.2)');
@@ -61,6 +61,7 @@
                         //remove any previous extra info tables and add in the new one
                         var table1 = $('#rs_entries').DataTable(); //row methods
                         var tr = $(this).closest('tr'); //return dom
+                        // debugger;
                         var row1 = table1.row(tr); //return data
                         function format (d) {
                             // `d` is the original data object for the row
