@@ -64,6 +64,7 @@
                         var tr = $(this).closest('tr'); //return dom
                         // debugger;
                         var row1 = table1.row(tr); //return data
+                        
                         function format (d) {
                             // `d` is the original data object for the row
                             return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;" class="rendered">'+
@@ -194,8 +195,6 @@
             $('#rs_entries_filter').remove()
             //remove the show 10 entries drop down
             $('.dataTables_length').remove();
-            //Setting good spacing for search buttons
-            $('#searchBtnTab td, #searchBtnTab th').css('padding', '10px');
             //searchbutton
             $('.searchBtn').on('click', function () {$(this).css('background-color', 'black');} );
             $('.tooltipHeader').tooltip();
@@ -308,12 +307,16 @@
             background-color: black;
             border-color: #BEBEBE;
         }
-        td.searchTerm {
-            font-size: 15px;
+        #searchBtnTab td, #searchBtnTab th {
+            padding: 10px;
+        }
+        #searchBtnTab td.searchTerm {
+            font-size: 16px;
             color: #383838;
             opacity: 0.7;
+            padding-top: 26px;
         }
-        h2{
+        h2 {
             margin-top: 0px;
             margin-bottom: 0px;
             text-align: left;
@@ -355,6 +358,10 @@
         #rs_entries th a:hover {
             text-decoration: none;
         }
+        .smallPrint {
+            font-size: 10px;
+            font-weight: 500;
+        }
 
 
 
@@ -372,7 +379,7 @@
             <div></div>
             <table id='searchBtnTab'>
                  <tr>
-                    <td class='searchTerm'>Ride Share Score</td>
+                    <td class='searchTerm'>Ride Share Score<br><p class='smallPrint'>Bigger Score = Better Ride (Max = 30.4)</p></td>
 
                     <td><input type="text" id="min" name="min" class='searchBox form-control' maxlength='4' placeholder='MIN'></td>                    
                     <td><input type="text" id="max" name="max" class='searchBox form-control' maxlength='4' placeholder='MAX'></td>
