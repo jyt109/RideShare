@@ -6,6 +6,7 @@
         <script type="text/javascript" src="../static/js/search.js"></script>
         <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.js"></script>
         <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="../static/css/tooltip.css">
 
     <script>
 
@@ -197,6 +198,8 @@
             $('#searchBtnTab td, #searchBtnTab th').css('padding', '10px');
             //searchbutton
             $('.searchBtn').on('click', function () {$(this).css('background-color', 'black');} );
+            $('.tooltipHeader').tooltip();
+
         }); //document ready end
         //add ride share moving path
         function get_ride_share() {
@@ -345,6 +348,14 @@
             width:60%;
             height:50%;
         }
+        #rs_entries th a {
+            font-size: 14px;
+        }
+        #rs_entries th a:hover {
+            text-decoration: none;
+        }
+
+
 
     </style>
 {% endblock %}
@@ -383,12 +394,42 @@
         <table id='rs_entries' class='table display' cellspacing="0">
             <thead>
                 <tr>
-                    <th><p>Start<br>Point</p></th>
-                    <th><p>End<br>Point</p></th>
-                    <th><p>Miles<br>Saved</p></th>
-                    <th><p>Extra<br>Time</p></th>
-                    <th><p>Money<br>Saved</p></th>
-                    <th><p>RideShare<br>Score</p></th>
+                    <th>
+                        <p><a class="tooltipHeader" data-toggle="tooltip" data-placement="top"
+                         title="Location of first pick up">
+                            Origin
+                        </a></p>
+                    </th>
+                    <th>
+                        <p><a class="tooltipHeader" data-toggle="tooltip" data-placement="top"
+                         title="Location of last drop off">
+                            Destination
+                        </a></p>
+                    </th>
+                    <th>
+                        <p><a class="tooltipHeader" data-toggle="tooltip" data-placement="top"
+                         title="Miles saved upon ride share">
+                            Miles
+                        </a></p>
+                    </th>
+                    <th>
+                        <p><a class="tooltipHeader" data-toggle="tooltip" data-placement="top"
+                         title="Extra time taken to arrive at destination">
+                            Extra Time
+                        </a></p>
+                    </th>
+                    <th>
+                        <p><a class="tooltipHeader" data-toggle="tooltip" data-placement="top"
+                         title="Money saved overall upon ride share">
+                            Fare Saved
+                        </a></p>
+                    </th>
+                    <th>
+                        <p><a class="tooltipHeader" data-toggle="tooltip" data-placement="top"
+                         title="Measure of how worthwhile the ride sharing is">
+                            Score
+                        </a></p>
+                    </th>
                 </tr>
             </thead>
         </table>
