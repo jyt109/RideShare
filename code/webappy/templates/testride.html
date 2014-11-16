@@ -7,7 +7,7 @@
         <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.js"></script>
         <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.css">
 
-    <script type="text/javascript" language="javascript" class="init">
+    <script>
 
         function parse_to_float(data) {
             var lst = [];
@@ -166,6 +166,9 @@
                            }
                         }); //end of ajax
                     }); //end of on click
+                    // debugger;
+                    //click the first entry after the label is loaded
+                    $('tr.odd:first-child').click();
                 }, //end of fnInitComplete
             }); //end of datatable (just before ready document)
             // Score filter(custom function in search.js) and show the loading icon
@@ -309,7 +312,7 @@
         }
         h2{
             margin-top: 0px;
-            margin-bottom: 20px;
+            margin-bottom: 0px;
             text-align: left;
             float: left;
         }
@@ -352,7 +355,7 @@
         <div id='searchDiv'>
             <div id="titleRideShare">
                 <h2>Find Ride Shares By:</h2>
-                <button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share</button>
+                <!-- <button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share</button> -->
             </div>
 
             <table id='searchBtnTab'>
