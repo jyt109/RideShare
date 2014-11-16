@@ -42,16 +42,17 @@
                 "bFilter": true,
                 "bAutoWidth": false,
                 "columns": [
-                    { "data": 0, "orderable": false},
-                    { "data": 1, "orderable": false },
+                    { "data": 6, "orderable": false},
+                    { "data": 7, "orderable": false },
                     { "data": 2, "orderable": false },
                     { "data": 3, "orderable": true },
                     { "data": 4, "orderable": true },
                     { "data": 5, "orderable": true },
 
                 ],
-                "order": [[5, 'desc']],
                 "fnInitComplete" : function (oSettings,json) {
+                    // remove the loading pandas
+                    $('#loading').removeClass('work');
                     $("#rs_entries").on('click', 'tbody tr', function( e ) {
                         //set the background color
                         $('#rs_entries').find('tbody tr').css('background-color', 'white');
@@ -67,14 +68,11 @@
                                 '<tr>'+
                                     '<td>Full name:</td>'+
                                     '<td>'+ d[6] +'</td>'+
+                                    '<td><button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share</button></td>'+
                                 '</tr>'+
                                 '<tr>'+
                                     '<td>Extension number:</td>'+
                                     '<td>'+ d[7] +'</td>'+
-                                '</tr>'+
-                                '<tr>'+
-                                    '<td>Extra info:</td>'+
-                                    '<td>' + d[8] + '</td>'+
                                 '</tr>'+
                             '</table>';
                         }
@@ -181,16 +179,10 @@
                     }
                 }, 100);
             });
-            $('#searchScoreBtn').on('click', function() {
-                $('#loading').addClass('work');
-                setTimeout(function() {
-                    try {
-                        table.draw();
-                    }
-                    finally {
-                        $('#loading').removeClass('work');
-                    }
-                }, 100);
+            $('th.sorting').on('click', function() {
+                setTimeout(function(){
+                    $('#loading').removeClass('work');
+                }, 200);
             });
 
             //Removing the general search box without disabling filter (we all know how painful that can be)
@@ -387,8 +379,8 @@
         <table id='rs_entries' class='table display' cellspacing="0">
             <thead>
                 <tr>
-                    <th><p>Current<br>Ride</p></th>
-                    <th><p>Matched<br>Ride</p></th>
+                    <th><p>Start<br>Point</p></th>
+                    <th><p>End<br>Point</p></th>
                     <th><p>Miles<br>Saved</p></th>
                     <th><p>Extra<br>Time</p></th>
                     <th><p>Money<br>Saved</p></th>

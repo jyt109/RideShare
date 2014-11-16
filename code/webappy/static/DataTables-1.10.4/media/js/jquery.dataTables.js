@@ -4688,74 +4688,79 @@
 	 *  @memberof DataTable#oApi
 	 */
 	function _fnSortListener ( settings, colIdx, append, callback )
-	{
-		var col = settings.aoColumns[ colIdx ];
-		var sorting = settings.aaSorting;
-		var asSorting = col.asSorting;
-		var nextSortIdx;
-		var next = function ( a, overflow ) {
-			var idx = a._idx;
-			if ( idx === undefined ) {
-				idx = $.inArray( a[1], asSorting );
+	{	//Adding in my own loading logo
+		$('#loading').addClass('work');
+
+		setTimeout(function () {
+			var col = settings.aoColumns[ colIdx ];			
+			var sorting = settings.aaSorting;
+			var asSorting = col.asSorting;
+			var nextSortIdx;
+			var next = function ( a, overflow ) {
+				var idx = a._idx;
+				if ( idx === undefined ) {
+					idx = $.inArray( a[1], asSorting );
+				}
+		
+				return idx+1 < asSorting.length ?
+					idx+1 :
+					overflow ?
+						null :
+						0;
+			};
+		
+			// Convert to 2D array if needed
+			if ( typeof sorting[0] === 'number' ) {
+				sorting = settings.aaSorting = [ sorting ];
 			}
-	
-			return idx+1 < asSorting.length ?
-				idx+1 :
-				overflow ?
-					null :
-					0;
-		};
-	
-		// Convert to 2D array if needed
-		if ( typeof sorting[0] === 'number' ) {
-			sorting = settings.aaSorting = [ sorting ];
-		}
-	
-		// If appending the sort then we are multi-column sorting
-		if ( append && settings.oFeatures.bSortMulti ) {
-			// Are we already doing some kind of sort on this column?
-			var sortIdx = $.inArray( colIdx, _pluck(sorting, '0') );
-	
-			if ( sortIdx !== -1 ) {
-				// Yes, modify the sort
-				nextSortIdx = next( sorting[sortIdx], true );
-	
-				if ( nextSortIdx === null ) {
-					sorting.splice( sortIdx, 1 );
+		
+			// If appending the sort then we are multi-column sorting
+			if ( append && settings.oFeatures.bSortMulti ) {
+				// Are we already doing some kind of sort on this column?
+				var sortIdx = $.inArray( colIdx, _pluck(sorting, '0') );
+		
+				if ( sortIdx !== -1 ) {
+					// Yes, modify the sort
+					nextSortIdx = next( sorting[sortIdx], true );
+		
+					if ( nextSortIdx === null ) {
+						sorting.splice( sortIdx, 1 );
+					}
+					else {
+						sorting[sortIdx][1] = asSorting[ nextSortIdx ];
+						sorting[sortIdx]._idx = nextSortIdx;
+					}
 				}
 				else {
-					sorting[sortIdx][1] = asSorting[ nextSortIdx ];
-					sorting[sortIdx]._idx = nextSortIdx;
+					// No sort on this column yet
+					sorting.push( [ colIdx, asSorting[0], 0 ] );
+					sorting[sorting.length-1]._idx = 0;
 				}
 			}
-			else {
-				// No sort on this column yet
-				sorting.push( [ colIdx, asSorting[0], 0 ] );
-				sorting[sorting.length-1]._idx = 0;
+			else if ( sorting.length && sorting[0][0] == colIdx ) {
+				// Single column - already sorting on this column, modify the sort
+				nextSortIdx = next( sorting[0] );
+		
+				sorting.length = 1;
+				sorting[0][1] = asSorting[ nextSortIdx ];
+				sorting[0]._idx = nextSortIdx;
 			}
-		}
-		else if ( sorting.length && sorting[0][0] == colIdx ) {
-			// Single column - already sorting on this column, modify the sort
-			nextSortIdx = next( sorting[0] );
-	
-			sorting.length = 1;
-			sorting[0][1] = asSorting[ nextSortIdx ];
-			sorting[0]._idx = nextSortIdx;
-		}
-		else {
-			// Single column - sort only on this column
-			sorting.length = 0;
-			sorting.push( [ colIdx, asSorting[0] ] );
-			sorting[0]._idx = 0;
-		}
-	
-		// Run the sort by calling a full redraw
-		_fnReDraw( settings );
-	
-		// callback used for async user interaction
-		if ( typeof callback == 'function' ) {
-			callback( settings );
-		}
+			else {
+				// Single column - sort only on this column
+				sorting.length = 0;
+				sorting.push( [ colIdx, asSorting[0] ] );
+				sorting[0]._idx = 0;
+			}
+		
+			// Run the sort by calling a full redraw
+			_fnReDraw( settings );
+		
+			// callback used for async user interaction
+			if ( typeof callback == 'function' ) {
+				callback( settings );
+			}
+		}, 200);
+
 	}
 	
 	
@@ -4840,38 +4845,39 @@
 	// cache), or from a sort formatter
 	function _fnSortData( settings, idx )
 	{
-		// Custom sorting function - provided by the sort data type
-		var column = settings.aoColumns[ idx ];
-		var customSort = DataTable.ext.order[ column.sSortDataType ];
-		var customData;
-	
-		if ( customSort ) {
-			customData = customSort.call( settings.oInstance, settings, idx,
-				_fnColumnIndexToVisible( settings, idx )
-			);
-		}
-	
-		// Use / populate cache
-		var row, cellData;
-		var formatter = DataTable.ext.type.order[ column.sType+"-pre" ];
-	
-		for ( var i=0, ien=settings.aoData.length ; i<ien ; i++ ) {
-			row = settings.aoData[i];
-	
-			if ( ! row._aSortData ) {
-				row._aSortData = [];
+			// Custom sorting function - provided by the sort data type
+			var column = settings.aoColumns[ idx ];
+
+			var customSort = DataTable.ext.order[ column.sSortDataType ];
+			var customData;
+		
+			if ( customSort ) {
+				customData = customSort.call( settings.oInstance, settings, idx,
+					_fnColumnIndexToVisible( settings, idx )
+				);
 			}
-	
-			if ( ! row._aSortData[idx] || customSort ) {
-				cellData = customSort ?
-					customData[i] : // If there was a custom sort function, use data from there
-					_fnGetCellData( settings, i, idx, 'sort' );
-	
-				row._aSortData[ idx ] = formatter ?
-					formatter( cellData ) :
-					cellData;
+			// Use / populate cache
+			var row, cellData;
+			var formatter = DataTable.ext.type.order[ column.sType+"-pre" ];
+		
+			for ( var i=0, ien=settings.aoData.length ; i<ien ; i++ ) {
+				row = settings.aoData[i];
+		
+				if ( ! row._aSortData ) {
+					row._aSortData = [];
+				}
+		
+				if ( ! row._aSortData[idx] || customSort ) {
+					cellData = customSort ?
+						customData[i] : // If there was a custom sort function, use data from there
+						_fnGetCellData( settings, i, idx, 'sort' );
+		
+					row._aSortData[ idx ] = formatter ?
+						formatter( cellData ) :
+						cellData;
+				}
 			}
-		}
+
 	}
 	
 	
