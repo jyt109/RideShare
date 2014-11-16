@@ -55,7 +55,6 @@
                     { "data": 5, "orderable": true },
 
                 ],
-                "fnDrawCallback" : function (oSettings){hideLoading();}, 
                 "fnInitComplete" : function (oSettings,json) {
                     // remove the loading pandas
                     //$('#loading').removeClass('work');
@@ -67,7 +66,6 @@
                         //remove any previous extra info tables and add in the new one
                         var table1 = $('#rs_entries').DataTable(); //row methods
                         var tr = $(this).closest('tr'); //return dom
-                        // debugger;
                         var row1 = table1.row(tr); //return data
                         
                         function format (d) {
@@ -117,24 +115,28 @@
                                     click_to_remove();
                                 }
                                 console.log('Receive routes');
+                                
                                 var json_data = JSON.parse(data);
+
                                 var croute = parse_to_float(json_data[0]),
                                 mroute = parse_to_float(json_data[1]);
                                 //plot routes on map 2700, 2077
                                 var m_len = mroute.length,
                                 c_len = croute.length;
-                                var mid_point = Math.round((m_len + c_len) /2)
+                                var mid_point = Math.round((m_len + c_len) / 4)
                                 var longer_route;
                                 if (mroute.length > croute.length) {
                                     longer_route = mroute;
                                 } else {
                                     longer_route = croute;
                                 }
+
                                 window.cline = L.polyline(croute, {'color': 'blue', 
                                                                 'weight': 6}).addTo(map);
                                 window.mline = L.polyline(mroute, {'color': 'green', 
                                                                 'weight': 6}).addTo(map);
                                 map.setView(longer_route[mid_point], 12);
+
                                 //blue is current, green is mathched
                                 var start_blue = croute[0],
                                 end_blue = croute[c_len - 1],
@@ -177,6 +179,7 @@
                     //click the first entry after the label is loaded
                     $('tr.odd:first-child').click();
                 }, //end of fnInitComplete
+                "fnDrawCallback" : function (oSettings){hideLoading();}
             }); //end of datatable (just before ready document)
             // Score filter(custom function in search.js) and show the loading icon
             $('#searchScoreBtn').on('click', function() {
