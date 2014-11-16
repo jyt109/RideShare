@@ -333,11 +333,12 @@
         #titleRideShare{
             width: 600px;
         }
-/*        #searchBtnTab {
-            margin-left: 15px;
-            margin-bottom: 10px;
+        #searchBtnTab {
+            /*margin-left: 15px;*/
+            margin-bottom: 18px;
+            clear: left;
         }
-*/      #loading {
+        #loading {
             visibility: hidden;
         }
         #loading.work {
@@ -368,13 +369,13 @@
                 <h2>Find Ride Shares By:</h2>
                 <!-- <button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share</button> -->
             </div>
-
+            <div></div>
             <table id='searchBtnTab'>
                  <tr>
-                    <td><input type="text" id="min" name="min" class='searchBox form-control' maxlength='4'></td>                    
-                    <td class='searchTerm'><&nbsp Ride Share Score &nbsp< </td>
-                    <td><input type="text" id="max" name="max" class='searchBox form-control' maxlength='4'></td>
-                    <td></td>
+                    <td class='searchTerm'>Ride Share Score</td>
+
+                    <td><input type="text" id="min" name="min" class='searchBox form-control' maxlength='4' placeholder='MIN'></td>                    
+                    <td><input type="text" id="max" name="max" class='searchBox form-control' maxlength='4' placeholder='MAX'></td>
                     <td> <button class="btn btn-warning searchBtn" id="searchScoreBtn">Go</button> </td>
                     <td><div id="loading"><img src="../static/images/loading.png" id="loadImg"></div></td>
 
@@ -426,7 +427,7 @@
                     </th>
                     <th>
                         <p><a class="tooltipHeader" data-toggle="tooltip" data-placement="top"
-                         title="Measure of how worthwhile the ride sharing is">
+                         title="How worthwhile the ride sharing is">
                             Score
                         </a></p>
                     </th>
