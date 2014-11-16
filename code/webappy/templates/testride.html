@@ -28,6 +28,10 @@
             $('.leaflet-zoom-hide').remove()
         }
 
+        function hideLoading() {
+            $('#loading').removeClass('work');
+        };
+
 
         //calling data to map
         $(document).ready(function(){  
@@ -51,6 +55,7 @@
                     { "data": 5, "orderable": true },
 
                 ],
+                "fnDrawCallback" : function (oSettings){hideLoading();}, 
                 "fnInitComplete" : function (oSettings,json) {
                     // remove the loading pandas
                     //$('#loading').removeClass('work');
@@ -176,20 +181,15 @@
             // Score filter(custom function in search.js) and show the loading icon
             $('#searchScoreBtn').on('click', function() {
                 $('#loading').addClass('work');
-                setTimeout(function() {
-                    try {
-                        table.draw();
-                    }
-                    finally {
-                        $('#loading').removeClass('work');
-                    }
-                }, 100);
+                //table.draw();
+                setTimeout(function() {table.draw();}, 100);
             });
-            $('th.sorting').on('click', function() {
-                setTimeout(function(){
-                    $('#loading').removeClass('work');
-                }, 200);
-            });
+            ////BUG
+            // $('th.sorting').on('click', function() {
+            //     setTimeout(function(){
+            //         $('#loading').removeClass('work');
+            //     }, 200);
+            // });
 
             //Removing the general search box without disabling filter (we all know how painful that can be)
             $('#rs_entries_filter').remove()
