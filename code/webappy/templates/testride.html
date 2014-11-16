@@ -2,11 +2,13 @@
 {% block title %}RideViz{% endblock %}
 {% block head %}
     {{ super() }}
-        <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.css">
-        <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.4/js/jquery.dataTables.js"></script>
+        <script type="text/javascript" language="javascript" src="../static/DataTables-1.10.4/media/js/jquery.dataTables.js"></script>
+        <script type="text/javascript" src="../static/js/search.js"></script>
         <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+        <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.css">
 
-    <script>
+    <script type="text/javascript" language="javascript" class="init">
+
         function parse_to_float(data) {
             var lst = [];
             for (var i=0; i < data.length; i++) {
@@ -25,45 +27,30 @@
             $('.leaflet-zoom-hide').remove()
         }
 
-        //search box
-        $.fn.dataTable.ext.search.push(
-            function( settings, data, dataIndex ) {
-                var min = parseInt( $('#min').val(), 10 );
-                var max = parseInt( $('#max').val(), 10 );
-                var age = parseFloat( data[6] ) || 0; // use data for the age column
-                debugger;
-                if ( ( isNaN( min ) && isNaN( max ) ) ||
-                     ( isNaN( min ) && age <= max ) ||
-                     ( min <= age   && isNaN( max ) ) ||
-                     ( min <= age   && age <= max ) )
-                {
-                    return true;
-                }
-                return false;
-            }
-        );
 
         //calling data to map
         $(document).ready(function(){  
-            $('#rs_entries').DataTable({
+            var table = $('#rs_entries').DataTable({
                 'ajax': {
                     'url': 'readjson',
                     'type': 'POST'
                 },
+                "bDeferRender": true,
+                "bProcessing": false,
+                "bStateSave": true,
                 "iDisplayLength": 5,
-                "bFilter": false,
+                "bFilter": true,
                 "bAutoWidth": false,
                 "columns": [
                     { "data": 0, "orderable": false},
                     { "data": 1, "orderable": false },
-                    { "data": 2 },
-                    { "data": 3 },
-                    { "data": 4 },
-                    { "data": 5 },
-                    { "data": 6 } 
+                    { "data": 2, "orderable": false },
+                    { "data": 3, "orderable": true },
+                    { "data": 4, "orderable": true },
+                    { "data": 5, "orderable": true },
 
                 ],
-                "order": [[1, 'asc'], [2, 'asc']],
+                "order": [[5, 'desc']],
                 "fnInitComplete" : function (oSettings,json) {
                     $("#rs_entries").on('click', 'tbody tr', function( e ) {
                         //set the background color
@@ -76,32 +63,32 @@
                         var row1 = table1.row(tr); //return data
                         function format (d) {
                             // `d` is the original data object for the row
-                            return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+                            return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;" class="rendered">'+
                                 '<tr>'+
                                     '<td>Full name:</td>'+
-                                    '<td>'+ d[7] +'</td>'+
+                                    '<td>'+ d[6] +'</td>'+
                                 '</tr>'+
                                 '<tr>'+
                                     '<td>Extension number:</td>'+
-                                    '<td>'+ d[8] +'</td>'+
+                                    '<td>'+ d[7] +'</td>'+
                                 '</tr>'+
                                 '<tr>'+
                                     '<td>Extra info:</td>'+
-                                    '<td>' + d[9] + '</td>'+
+                                    '<td>' + d[8] + '</td>'+
                                 '</tr>'+
                             '</table>';
                         }
-                
+                        
                         if ( row1.child.isShown() ) {
                             row1.child.hide();
                             tr.removeClass('shown');
                         }
-                        else {
-                            $('tr.shown + tr').remove();
-                            $('tr.shown').removeClass('shown');
-                            row1.child( format(row1.data()) ).show();
-                            tr.addClass('shown');
-                        }
+                   
+                        $('tr.shown + tr').remove();
+                        $('tr.shown').removeClass('shown');
+                        row1.child( format(row1.data()) ).show();
+                        tr.addClass('shown');
+                        
 
                         //get row data
                         var table2 = $('#rs_entries').dataTable();
@@ -131,10 +118,11 @@
                                 var m_len = mroute.length,
                                 c_len = croute.length;
                                 var mid_point = Math.round((m_len + c_len) /2)
+                                var longer_route;
                                 if (mroute.length > croute.length) {
-                                    var longer_route = mroute;
+                                    longer_route = mroute;
                                 } else {
-                                    var longer_route = croute;
+                                    longer_route = croute;
                                 }
                                 window.cline = L.polyline(croute, {'color': 'blue', 
                                                                 'weight': 6}).addTo(map);
@@ -181,17 +169,26 @@
                     }); //end of on click
                 }, //end of fnInitComplete
             }); //end of datatable (just before ready document)
-            
-            var table = $('#rs_entries').DataTable();
-            // Event listener to the two range filtering inputs to redraw on input
-            $('#min, #max').keyup( function() {
-                console.log('keyup');
-                table.draw();
-            } );
-
+            // Score filter
+            $('#searchScoreBtn').on('click', function() {
+                $('#loading').addClass('work');
+                setTimeout(function() {
+                    try {
+                        table.draw();
+                    }
+                    finally {
+                        $('#loading').removeClass('work');
+                    }
+                }, 100);
+            });
+            //Removing the general search box without disabling filter (we all know how painful that can be)
+            $('#rs_entries_filter').remove()
             //remove the show 10 entries drop down
             $('.dataTables_length').remove();
-
+            //Setting good spacing for search buttons
+            $('#searchBtnTab td, #searchBtnTab th').css('padding', '10px');
+            //searchbutton
+            $('.searchBtn').on('click', function () {$(this).css('background-color', 'black');} );
         }); //document ready end
         //add ride share moving path
         function get_ride_share() {
@@ -231,16 +228,6 @@
             font-size: 12px;
             text-align: center;
         }
-        tr td:nth-child(1) {
-            font-weight: bold;
-            color: #00688B;
-            opacity: 0.6;  
-        }
-        tr td:nth-child(2) {
-            font-weight: bold;
-            color: #009900;            
-            opacity: 0.6;  
-        }
         th {
             text-align: center;
             font-size: 12px;
@@ -248,6 +235,7 @@
         .dataTables_info {
             font-size: 12px;
             opacity: 0.4;
+            width: 30px;
         }
         div.dataTables_paginate ul.pagination {
             margin: 5px 0px 0px -100px;
@@ -281,9 +269,48 @@
         .leaflet-popup-tip {
             width: 5px;
         }
+        .table>thead>tr>th, .table>tbody>tr>th,
+        .table>tfoot>tr>th, .table>thead>tr>td,
+        .table>tbody>tr>td, .table>tfoot>tr>td {
+            padding: 8px;
+        }
+
+        .searchBox {
+            height: 25px;
+            font-size: 14px;
+            width: 60px;
+            font-weight: normal;
+            color: black;
+        }
+        .searchBtn {
+            letter-spacing: 1px;
+            font-size: 12px;
+            padding-top: 3px;
+            padding-bottom: 3px;
+            padding-left: 10px;
+            padding-right: 10px;
+            background-color: black;
+            border-color: black;
+            font-weight: bold;
+        }
+        .searchBtn:hover {
+            background-color: black;
+            border-color: #BEBEBE;
+        }
+        td.searchTerm {
+            font-size: 15px;
+            color: #383838;
+            opacity: 0.7;
+        }
+        h2{
+            margin-top: 0px;
+            margin-bottom: 20px;
+            text-align: left;
+            float: left;
+        }
         .route_btn {
-            margin-left: 270px;
-            margin-top: 20px;
+            margin-left: 170px;
+            margin-top: 10px;
             float: left;
             font-size: 16px;
             padding-left: 10px;
@@ -292,25 +319,23 @@
             opacity: 0.9;
             letter-spacing: 1px;
         }
+        #searchForms{
+            width: 600px;
+        }
+        #searchBtnTab {
+            margin-left: 15px;
+            margin-bottom: 10px;
+        }
+        #loading {
+            visibility: hidden;
+        }
+        #loading.work {
+            visibility: visible;
+        }
 
-        td.details-control {
-            background: url('../static/images/details_open.png') no-repeat center center;
-            cursor: pointer;
-            background-size: 60% 65%;
-        }
-        tr.shown td.details-control {
-            background: url('../static/images/details_close.png') no-repeat center center;
-            background-size: 60% 65%;
-        }
-        .table>thead>tr>th, .table>tbody>tr>th,
-        .table>tfoot>tr>th, .table>thead>tr>td,
-        .table>tbody>tr>td, .table>tfoot>tr>td {
-            padding: 8px;
-        }
-        .form-control {
-            height: 25px;
-            font-size: 11px;
-            font-weight: normal;
+        #loadImg {
+            width:60%;
+            height:50%;
         }
 
     </style>
@@ -319,34 +344,48 @@
 {% block content %}
     <div id='map'></div>
     <div id="tab">
-        <div id='forms'></div>
-            <table border="0" cellspacing="5" cellpadding="5">
-                <tr>
-                    <td>Minimum age:</td>
-                    <td><input type="text" id="min" name="min"></td>
-                </tr>
-                <tr>
-                    <td>Maximum age:</td>
-                    <td><input type="text" id="max" name="max"></td>
-                </tr>
-            </table>
+        <div id='searchBtnDiv'>
+            <div id="searchForms">
+                <h2>Find Ride Shares By:</h2>
+                <button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share</button>
+            </div>
 
-            <table id='rs_entries' class='table display' cellspacing="0">
-                <thead>
-                    <tr>
-                        <th><p>Current<br>Ride</p></th>
-                        <th><p>Matched<br>Ride</p></th>
-                        <th><p>Time<br>(am)</p></th>
-                        <th><p>Miles<br>Saved</p></th>
-                        <th><p>Extra<br>Time</p></th>
-                        <th><p>Money<br>Saved</p></th>
-                        <th><p>RideShare<br>Score</p></th>
-                    </tr>
-                </thead>
+            <table id='searchBtnTab'>
+                 <tr>
+                    <td><input type="text" id="min" name="min" class='searchBox form-control' maxlength='4'></td>                    
+                    <td class='searchTerm'><&nbsp Ride Share Score &nbsp< </td>
+                    <td><input type="text" id="max" name="max" class='searchBox form-control' maxlength='4'></td>
+                    <td></td>
+                    <td> <button class="btn btn-warning searchBtn" id="searchScoreBtn">Go</button> </td>
+                    <td><div id="loading"><img src="../static/images/loading.png" id="loadImg"></div></td>
+
+                </tr>
+
+                <tr>
+                    <td><input type="text" id="min" name="min" class='searchBox form-control' maxlength='4'></td>                    
+                    <td class='searchTerm'><&nbsp Ride Share Score &nbsp< </td>
+                    <td><input type="text" id="max" name="max" class='searchBox form-control' maxlength='4'></td>
+                    <td></td>
+                    <td> <button class="btn btn-warning searchBtn" id="searchScoreBtn">Go</button> </td>
+                    <td><div id="loading"><img src="../static/images/loading.png" id="loadImg"></div></td>
+
+                </tr>
+                <tr>
+                </tr>
             </table>
-    </div>
-    <div>
-        <button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share</button>
+        </div>
+        <table id='rs_entries' class='table display' cellspacing="0">
+            <thead>
+                <tr>
+                    <th><p>Current<br>Ride</p></th>
+                    <th><p>Matched<br>Ride</p></th>
+                    <th><p>Miles<br>Saved</p></th>
+                    <th><p>Extra<br>Time</p></th>
+                    <th><p>Money<br>Saved</p></th>
+                    <th><p>RideShare<br>Score</p></th>
+                </tr>
+            </thead>
+        </table>
     </div>
 {% endblock %}
 
