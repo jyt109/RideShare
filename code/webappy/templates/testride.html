@@ -169,7 +169,7 @@
                     }); //end of on click
                 }, //end of fnInitComplete
             }); //end of datatable (just before ready document)
-            // Score filter
+            // Score filter(custom function in search.js) and show the loading icon
             $('#searchScoreBtn').on('click', function() {
                 $('#loading').addClass('work');
                 setTimeout(function() {
@@ -181,6 +181,18 @@
                     }
                 }, 100);
             });
+            $('#searchScoreBtn').on('click', function() {
+                $('#loading').addClass('work');
+                setTimeout(function() {
+                    try {
+                        table.draw();
+                    }
+                    finally {
+                        $('#loading').removeClass('work');
+                    }
+                }, 100);
+            });
+
             //Removing the general search box without disabling filter (we all know how painful that can be)
             $('#rs_entries_filter').remove()
             //remove the show 10 entries drop down
@@ -319,14 +331,14 @@
             opacity: 0.9;
             letter-spacing: 1px;
         }
-        #searchForms{
+        #titleRideShare{
             width: 600px;
         }
-        #searchBtnTab {
+/*        #searchBtnTab {
             margin-left: 15px;
             margin-bottom: 10px;
         }
-        #loading {
+*/      #loading {
             visibility: hidden;
         }
         #loading.work {
@@ -344,8 +356,8 @@
 {% block content %}
     <div id='map'></div>
     <div id="tab">
-        <div id='searchBtnDiv'>
-            <div id="searchForms">
+        <div id='searchDiv'>
+            <div id="titleRideShare">
                 <h2>Find Ride Shares By:</h2>
                 <button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share</button>
             </div>
@@ -361,7 +373,7 @@
 
                 </tr>
 
-                <tr>
+<!--                 <tr>
                     <td><input type="text" id="min" name="min" class='searchBox form-control' maxlength='4'></td>                    
                     <td class='searchTerm'><&nbsp Ride Share Score &nbsp< </td>
                     <td><input type="text" id="max" name="max" class='searchBox form-control' maxlength='4'></td>
@@ -370,9 +382,7 @@
                     <td><div id="loading"><img src="../static/images/loading.png" id="loadImg"></div></td>
 
                 </tr>
-                <tr>
-                </tr>
-            </table>
+ -->            </table>
         </div>
         <table id='rs_entries' class='table display' cellspacing="0">
             <thead>
