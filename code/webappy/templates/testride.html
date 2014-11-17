@@ -68,18 +68,33 @@
                         var row1 = table1.row(tr); //return data
                         
                         function format (d) {
-                            // `d` is the original data object for the row
-                            return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;" class="rendered">'+
-                                '<tr>'+
-                                    '<td>Full name:</td>'+
-                                    '<td>'+ d[6] +'</td>'+
-                                    '<td><button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share</button></td>'+
-                                '</tr>'+
-                                '<tr>'+
-                                    '<td>Extension number:</td>'+
-                                    '<td>'+ d[7] +'</td>'+
-                                '</tr>'+
-                            '</table>';
+                            var ride1P = d[6],
+                            ride2P = d[7];
+                            if (d[10] === "1") {
+                                var ride1D = d[8],
+                                ride2D = d[9];
+                            } else if(d[10] === "2"){
+                                var ride1D = d[8],
+                                ride2D = d[9];                                
+                            } else {
+                                console.log('unknown ride type');
+                            }
+    
+// `d` is the original data object for the row
+return '<div class="extraInfoDiv">' +
+            '<div>' +
+                '<p class="rideInfoa zero">Ride A: &nbsp</p>' +
+                '<p class="rideInfoa one">' + ride1P + '<img src="../static/images/glyphicons_217_circle_arrow_right.png" class="right_arr"></p>' +
+                '<p class="rideInfoa two">' + ride1D + '</p>'+ '<div class="spacer"></div>' + 
+            '</div>' +
+
+            '<div>' +
+                '<p class="rideInfob zero">Ride B: &nbsp</td>' +
+                '<p class="rideInfob one">' + ride2P + '<img src="../static/images/glyphicons_217_circle_arrow_right.png" class="right_arr"></p>' +
+                '<p class="rideInfob two">' + ride2D + '</p>'+
+            '</div>' +
+        '</div>' +            
+        '<button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share</button>'; 
                         }
                         
                         if ( row1.child.isShown() ) {
@@ -159,11 +174,11 @@
                                                                 'closeOnClick': false});
                                     marker.openPopup();
                                 }//marker_pop_bind
-                                marker_pop_bind(start_blue_mark, '<div class="bluem">Start 1</div>');
-                                marker_pop_bind(end_blue_mark, '<div class="bluem">End 1</div>');
+                                marker_pop_bind(start_blue_mark, '<div class="bluem">Start A</div>');
+                                marker_pop_bind(end_blue_mark, '<div class="bluem">End A</div>');
 
-                                marker_pop_bind(start_green_mark, '<div class="greenm">Start 2</div>');
-                                marker_pop_bind(end_green_mark, '<div class="greenm">End 2</div>');
+                                marker_pop_bind(start_green_mark, '<div class="greenm">Start B</div>');
+                                marker_pop_bind(end_green_mark, '<div class="greenm">End B</div>');
                                 //re-enable button after the shared path has been set right 
                                 //to allow the moving path to be called again
                                 $("button").prop("disabled",false);
@@ -178,7 +193,17 @@
                     //click the first entry after the label is loaded
                     $('tr.odd:first-child').click();
                 }, //end of fnInitComplete
-                "fnDrawCallback" : function (oSettings){hideLoading();}
+
+                /////CALL BACK
+                "fnDrawCallback" : function (oSettings){
+                    var table = $('#rs_entries').dataTable();
+                    // debugger;
+                    // table.fnSort(Regex[5, 'desc']]);
+                    hideLoading();
+                } // end of fnDrawCallback
+                /////
+
+
             }); //end of datatable (just before ready document)
             // Score filter(custom function in search.js) and show the loading icon
             $('#searchScoreBtn').on('click', function() {
@@ -206,7 +231,10 @@
             float: left;
             margin-left: 30px;
         }
-
+        .table tbody tr[role=row] td:nth-child(1),
+         .table tbody tr[role=row] td:nth-child(2) {
+            /*font-weight: bold;*/
+        }
         .table {
             width: 560px;
 /*            width: 100%;
@@ -229,13 +257,12 @@
         table.dataTable thead .sorting_desc {
             background: none;
         }
-        tr td {
-            font-size: 12px;
+        .table tr td {
+            font-size: 13px;
             text-align: center;
         }
-        th {
+        .table th {
             text-align: center;
-            font-size: 12px;
         }
         .dataTables_info {
             font-size: 12px;
@@ -303,7 +330,10 @@
             border-color: #BEBEBE;
         }
         #searchBtnTab td, #searchBtnTab th {
-            padding: 10px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 10px;
+            padding-right: 10px;
         }
         #searchBtnTab td.searchTerm {
             font-size: 16px;
@@ -317,23 +347,12 @@
             text-align: left;
             float: left;
         }
-        .route_btn {
-            margin-left: 170px;
-            margin-top: 10px;
-            float: left;
-            font-size: 16px;
-            padding-left: 10px;
-            padding-right: 10px;
-            background-color: #FF3333;
-            opacity: 0.9;
-            letter-spacing: 1px;
-        }
         #titleRideShare{
             width: 600px;
         }
         #searchBtnTab {
             /*margin-left: 15px;*/
-            margin-bottom: 18px;
+            margin-bottom: 0px; /*///*/
             clear: left;
         }
         #loading {
@@ -356,6 +375,54 @@
         .smallPrint {
             font-size: 10px;
             font-weight: 500;
+        }
+        .extraInfoDiv {
+            float: left;
+            width: 370px;
+        }
+
+        .extraInfoDiv p {
+            font-size: 12px;
+            font-weight: 500;
+            float:left;
+            padding: 5px 0px 7px 5px;
+        }
+        .extraInfoDiv p.rideInfoa {
+            color: blue;
+            opacity: 0.6;
+        }
+        .extraInfoDiv p.rideInfob {
+            color: green;
+            opacity: 0.6;
+        }
+        .route_btn {
+            float: left;
+            font-size: 13px;
+            margin-top: 15px;
+            /*margin-left: 60px;*/
+            padding-left: 7px;
+            padding-right: 7px;
+            background-color: #FF3333;
+            opacity: 0.8;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+        img.right_arr {
+            padding-left: 7px;
+            vertical-align: middle;
+        }
+        .extraInfoDiv .one{
+            padding-top: 2px;
+        }
+        .extraInfoDiv p {margin: 0;}
+        .spacer {clear: both;}
+        .extraInfoDiv .zero{
+            font-weight: bold;
+            font-size: 13px;
+            padding-left: 25px;
+        }
+        .floaterDiv {
+            float: left;
         }
 
 
