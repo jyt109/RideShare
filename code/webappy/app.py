@@ -45,6 +45,7 @@ def index():
 def read_json():
     print 'Loading rides file...'
     d = json.load(open('data/results.json'))
+    print d['data'][0]
     return json.dumps(d)
 
 @app.route('/testshare')

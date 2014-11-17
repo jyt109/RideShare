@@ -32,7 +32,6 @@
             $('#loading').removeClass('work');
         };
 
-
         //calling data to map
         $(document).ready(function(){  
             var table = $('#rs_entries').DataTable({
@@ -47,14 +46,14 @@
                 "bFilter": true,
                 "bAutoWidth": false,
                 "columns": [
-                    { "data": 6, "orderable": false},
-                    { "data": 7, "orderable": false },
-                    { "data": 2, "orderable": false },
-                    { "data": 3, "orderable": true },
-                    { "data": 4, "orderable": true },
-                    { "data": 5, "orderable": true },
-
+                    { "data": 6, "orderable": false}, //,  "sWidth": "5%"
+                    { "data": 7, "orderable": false},
+                    { "data": 2, "orderable": false},
+                    { "data": 3, "orderable": true},
+                    { "data": 4, "orderable": true},
+                    { "data": 5, "orderable": true},
                 ],
+
                 "fnInitComplete" : function (oSettings,json) {
                     // remove the loading pandas
                     //$('#loading').removeClass('work');
@@ -184,16 +183,8 @@
             // Score filter(custom function in search.js) and show the loading icon
             $('#searchScoreBtn').on('click', function() {
                 $('#loading').addClass('work');
-                //table.draw();
                 setTimeout(function() {table.draw();}, 100);
             });
-            ////BUG
-            // $('th.sorting').on('click', function() {
-            //     setTimeout(function(){
-            //         $('#loading').removeClass('work');
-            //     }, 200);
-            // });
-
             //Removing the general search box without disabling filter (we all know how painful that can be)
             $('#rs_entries_filter').remove()
             //remove the show 10 entries drop down
@@ -210,16 +201,17 @@
     </script>
     <style>
         #map {
-            height: 450px;
-            width: 570px;
+            height: 460px;
+            width: 530px;
             float: left;
             margin-left: 30px;
         }
 
         .table {
-            width: 100%;
+            width: 560px;
+/*            width: 100%;
             height: 100%;
-        }
+*/        }
         .table tbody tr.even:hover,
         .table tbody tr.odd:hover{
             cursor: pointer;
@@ -227,7 +219,7 @@
             background-color: rgba(70, 130, 180, 0.1) !important; 
         }
         .main_container {
-            width: 1250px;
+            width: 1200px;
             padding-top: 20px;
             padding-bottom: 20px;
             margin-left: auto ;
