@@ -9,6 +9,35 @@
         <link rel="stylesheet" type="text/css" href="../static/css/tooltip.css">
 
     <script>
+           function format (d) {
+                var ride1P = d[6],
+                ride2P = d[7];
+                if (d[10] === "1") {
+                    var ride1D = d[8],
+                    ride2D = d[9];
+                } else if(d[10] === "2"){
+                    var ride1D = d[8],
+                    ride2D = d[9];                                
+                } else {
+                    console.log('unknown ride type');
+                }
+    
+                // `d` is the original data object for the row
+                return '<div class="extraInfoDiv">' +
+                            '<div>' +
+                                '<p class="rideInfoa zero">Ride A: &nbsp</p>' +
+                                '<p class="rideInfoa one">' + ride1P + '<img src="../static/images/glyphicons_217_circle_arrow_right.png" class="right_arr"></p>' +
+                                '<p class="rideInfoa two">' + ride1D + '</p>'+ '<div class="spacer"></div>' + 
+                            '</div>' +
+
+                            '<div>' +
+                                '<p class="rideInfob zero">Ride B: &nbsp</td>' +
+                                '<p class="rideInfob one">' + ride2P + '<img src="../static/images/glyphicons_217_circle_arrow_right.png" class="right_arr"></p>' +
+                                '<p class="rideInfob two">' + ride2D + '</p>'+
+                            '</div>' +
+                        '</div>' +            
+                        '<button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share</button>'; 
+        };
 
         function parse_to_float(data) {
             var lst = [];
@@ -31,6 +60,9 @@
         function hideLoading() {
             $('#loading').removeClass('work');
         };
+        function showLoading() {
+            $('#loading').addClass('work');
+        };
 
         //calling data to map
         $(document).ready(function(){  
@@ -39,6 +71,7 @@
                     'url': 'readjson',
                     'type': 'POST'
                 },
+                "order": [[ 5, "desc" ]],
                 "bDeferRender": true,
                 "bProcessing": false,
                 "bStateSave": true,
@@ -53,6 +86,14 @@
                     { "data": 4, "orderable": true},
                     { "data": 5, "orderable": true},
                 ],
+                "preDrawCallback" : function (OSettings){
+                    // setTimeout(function() {
+                    //     $('#rs_entries').find('tbody tr').css('background-color', 'white');
+                    //     $('tr:has(".extraInfoDiv")').remove();
+                    //     $('#rs_entries tbody tr').removeClass('shown');                    
+                    // }, 00);
+                    // showLoading();
+                },
 
                 "fnInitComplete" : function (oSettings,json) {
                     // remove the loading pandas
@@ -67,35 +108,6 @@
                         var tr = $(this).closest('tr'); //return dom
                         var row1 = table1.row(tr); //return data
                         
-                        function format (d) {
-                            var ride1P = d[6],
-                            ride2P = d[7];
-                            if (d[10] === "1") {
-                                var ride1D = d[8],
-                                ride2D = d[9];
-                            } else if(d[10] === "2"){
-                                var ride1D = d[8],
-                                ride2D = d[9];                                
-                            } else {
-                                console.log('unknown ride type');
-                            }
-    
-// `d` is the original data object for the row
-return '<div class="extraInfoDiv">' +
-            '<div>' +
-                '<p class="rideInfoa zero">Ride A: &nbsp</p>' +
-                '<p class="rideInfoa one">' + ride1P + '<img src="../static/images/glyphicons_217_circle_arrow_right.png" class="right_arr"></p>' +
-                '<p class="rideInfoa two">' + ride1D + '</p>'+ '<div class="spacer"></div>' + 
-            '</div>' +
-
-            '<div>' +
-                '<p class="rideInfob zero">Ride B: &nbsp</td>' +
-                '<p class="rideInfob one">' + ride2P + '<img src="../static/images/glyphicons_217_circle_arrow_right.png" class="right_arr"></p>' +
-                '<p class="rideInfob two">' + ride2D + '</p>'+
-            '</div>' +
-        '</div>' +            
-        '<button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share</button>'; 
-                        }
                         
                         if ( row1.child.isShown() ) {
                             row1.child.hide();
@@ -149,7 +161,7 @@ return '<div class="extraInfoDiv">' +
                                                                 'weight': 6}).addTo(map);
                                 window.mline = L.polyline(mroute, {'color': 'green', 
                                                                 'weight': 6}).addTo(map);
-                                map.setView(longer_route[mid_point], 12);
+                                map.setView(longer_route[mid_point], 13);
 
                                 //blue is current, green is mathched
                                 var start_blue = croute[0],
@@ -193,12 +205,9 @@ return '<div class="extraInfoDiv">' +
                     //click the first entry after the label is loaded
                     $('tr.odd:first-child').click();
                 }, //end of fnInitComplete
-
                 /////CALL BACK
                 "fnDrawCallback" : function (oSettings){
                     var table = $('#rs_entries').dataTable();
-                    // debugger;
-                    // table.fnSort(Regex[5, 'desc']]);
                     hideLoading();
                 } // end of fnDrawCallback
                 /////
@@ -207,7 +216,7 @@ return '<div class="extraInfoDiv">' +
             }); //end of datatable (just before ready document)
             // Score filter(custom function in search.js) and show the loading icon
             $('#searchScoreBtn').on('click', function() {
-                $('#loading').addClass('work');
+                showLoading();
                 setTimeout(function() {table.draw();}, 100);
             });
             //Removing the general search box without disabling filter (we all know how painful that can be)
@@ -217,6 +226,7 @@ return '<div class="extraInfoDiv">' +
             //searchbutton
             $('.searchBtn').on('click', function () {$(this).css('background-color', 'black');} );
             $('.tooltipHeader').tooltip();
+            // table.on('draw', function() {showLoading();});
 
         }); //document ready end
         //add ride share moving path
@@ -424,7 +434,9 @@ return '<div class="extraInfoDiv">' +
         .floaterDiv {
             float: left;
         }
-
+        .blueClick {
+            background-color: rgba(70, 130, 180, 0.2);
+        }
 
 
     </style>
@@ -479,7 +491,7 @@ return '<div class="extraInfoDiv">' +
                     <th>
                         <p><a class="tooltipHeader" data-toggle="tooltip" data-placement="top"
                          title="Miles saved upon ride share">
-                            Miles
+                            Miles Saved
                         </a></p>
                     </th>
                     <th>

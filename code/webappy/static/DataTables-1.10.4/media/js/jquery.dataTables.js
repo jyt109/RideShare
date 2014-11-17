@@ -11140,7 +11140,7 @@
 			 *      } );
 			 *    } );
 			 */
-			"sInfoFiltered": "(filtered from _MAX_ total entries)",
+			"sInfoFiltered": "<br>(filtered from _MAX_ total entries)",
 	
 	
 			/**
