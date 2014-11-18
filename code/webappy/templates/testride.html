@@ -236,7 +236,7 @@
     </script>
     <style>
         #map {
-            height: 460px;
+            height: 500px;
             width: 530px;
             float: left;
             margin-left: 30px;
@@ -453,7 +453,7 @@
             <div></div>
             <table id='searchBtnTab'>
                  <tr>
-                    <td class='searchTerm'>Ride Share Score<br><p class='smallPrint'>Bigger Score = Better Ride (Max = 30.4)</p></td>
+                    <td class='searchTerm'>Ride Share Score<br><p class='smallPrint'>Bigger Score = Better Ride (Max = 28.7)</p></td>
 
                     <td><input type="text" id="min" name="min" class='searchBox form-control' maxlength='4' placeholder='MIN'></td>                    
                     <td><input type="text" id="max" name="max" class='searchBox form-control' maxlength='4' placeholder='MAX'></td>
@@ -497,7 +497,7 @@
                     <th>
                         <p><a class="tooltipHeader" data-toggle="tooltip" data-placement="top"
                          title="Extra time taken to arrive at destination">
-                            Extra Time
+                            Delay
                         </a></p>
                     </th>
                     <th>
@@ -538,7 +538,8 @@
         map = new L.Map('map', {center: man_center,  minZoom: 12, maxZoom: 16, detectRetina: true}); //, maxBounds: man_bounds
         osmTile = "http://tile.openstreetmap.org/{z}/{x}/{y}.png";
         osmCopyright = "Map data &copy; 2012 OpenStreetMap contributors";
-        osmLayer = new L.TileLayer(osmTile, {attribution: osmCopyright, opacity: 0.8}); //, bounds: man_bounds
+        osmLayer = new L.TileLayer(osmTile, {attribution: osmCopyright,
+         opacity: 0.8}); //, bounds: man_bounds
         map.addLayer(osmLayer);
         map.setView(man_center, 13);
     </script>

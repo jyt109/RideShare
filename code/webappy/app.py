@@ -36,11 +36,6 @@ def lst_to_geojson(lst_of_lat_long):
     return geojson
 
 
-@app.route('/')
-def index():
-    lst = range(10)
-    return render_template('index.html', entries=lst)
-
 @app.route('/readjson', methods=['POST'])
 def read_json():
     print 'Loading rides file...'
@@ -48,8 +43,8 @@ def read_json():
     print d['data'][0]
     return json.dumps(d)
 
-@app.route('/testshare')
-def testshare():
+@app.route('/')
+def index():
     return render_template('testride.html')
 
 @app.route('/getroutebyid', methods=['POST'])

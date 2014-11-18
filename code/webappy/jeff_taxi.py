@@ -35,20 +35,20 @@ df = pdsql.read_sql('SELECT * FROM rs_figures;', conn)
 # In[5]:
 
 #Ranges from negative of the longer ride to bigger than positive the longer ride
-df['Extra Time'] = df['osrm_time'] - df[['ctime','mtime']].max(axis=1)
-df['Time Saved'] = (df['osrm_time'] - df['ctime'] - df['mtime']) * -1
+# df['Extra Time'] = df['osrm_time'] - df[['ctime','mtime']].max(axis=1)
+df['Extra Time int'] = df['osrm_time'] - df['ctime'] - df['mtime']
 #The bigger the better
-df['Percent Time Saved'] = ((df.osrm_time - df.ctime - df.mtime) * -1 ) / (df.cdist + df.mdist)
-df['Extra Time'] = df['Extra Time'].apply(lambda x: 0 if x < 0 else x)
-df['Extra Time'] = df['Extra Time'].apply(lambda x: '%d min %d sec' % (x / 60, x % 60))
+df['Percent Extra Time'] = (((df['Extra Time int'] * -1. ) / (df.ctime + df.mtime).map(float)) / 60)
+df['Extra Time'] = df['Extra Time int'].apply(lambda x: '%d min %d sec' % ((x / 60) + 2, x % 60))
+
 
 #Ranges from negative of the longer ride to bigger than positive the longer ride
-df['Miles Saved'] = ((df.osrm_dist - df.cdist - df.mdist) * -1 / 1608) 
+df['Miles Saved'] = ((df.osrm_dist - df.cdist - df.mdist) * -1 / 1608.) 
 #The bigger the better 
 df['Percent Mile Saved'] = ((df.osrm_dist - df.cdist - df.mdist) * -1) / (df.cdist + df.mdist)
 
-ride_shares = df[(df['Percent Mile Saved'] > 0) & (df['Percent Time Saved'] > 0)]
-ride_shares['Score'] = (((ride_shares['Percent Mile Saved'] * 0.5) + (ride_shares['Percent Time Saved'] * 0.5)) * 100).round(1)
+ride_shares = df[(df['Percent Mile Saved'] > 0) & (df['Percent Extra Time'] > 0)]
+ride_shares['Score'] = (((ride_shares['Percent Mile Saved'] * 0.5) + (ride_shares['Percent Extra Time'] * 0.5)) * 100).round(1)
 ride_shares['money_saved'] = ride_shares['Miles Saved'].apply(lambda x: ((0.4 * 5) * x + 2.5).round(2))
 ride_shares['Money Saved'] = ride_shares['money_saved'].apply(lambda x: '$%.2f' % x )
 ride_shares['Time'] = ride_shares['cptime'].apply(lambda x: '%.02d:%.02d:%.02d' % (x.hour, x.minute, x.second))
@@ -101,7 +101,7 @@ del ride_shares['cploc']
 # In[9]:
 
 print spearmanr(ride_shares['Percent Mile Saved'], ride_shares['Score'])
-print spearmanr(ride_shares['Percent Time Saved'], ride_shares['Score'])
+print spearmanr(ride_shares['Percent Extra Time'], ride_shares['Score'])
 
 
 # In[10]:
@@ -137,7 +137,7 @@ for ride, matched_df in ride_share_gps:
 result_df = pd.DataFrame(result, columns=l)
 
 
-# In[66]:
+# In[14]:
 
 name_replace_lst = [['Adams Street / Brooklyn Bridge Boulevard', 'Adams Street'],
 ['Adam Clayton Powell Jr. Boulevard', 'Adam Clayton'],
@@ -154,26 +154,34 @@ name_replace_lst = [['Adams Street / Brooklyn Bridge Boulevard', 'Adams Street']
 be_replace, to_replace_w = zip(*name_replace_lst)
 
 def replaceNm(x):
-    return x.replace('Street', 'St.')     .replace('Approach', '')     .replace('Parkway', 'Pk.')     .replace('South', 'S.')     .replace('North', 'N.')     .replace('East', 'E.')     .replace('West', 'W.')     .replace('Avenue', 'Ave.')     .replace('Square', 'Sq.')     .replace('Boulevard', 'Bld.')     .replace('Drive', 'D.')     .replace('Place', 'Plc.') 
+    if len(x) > 10:
+        return x.replace('Street', 'St.')         .replace('Approach', '')         .replace('Parkway', 'Pk.')         .replace('South', 'S.')         .replace('North', 'N.')         .replace('East', 'E.')         .replace('West', 'W.')         .replace('Avenue', 'Ave.')         .replace('Square', 'Sq.')         .replace('Boulevard', 'Bld.')         .replace('Drive', 'D.')         .replace('Place', 'Plc.')
+    else:
+        return x
 
 
-# In[55]:
+# In[15]:
 
 result_df.replace(be_replace, to_replace_w, inplace=True)
 
 
-# In[71]:
+# In[16]:
 
 result_df[['point_1', 'point_2', 'point_3', 'point_4']] = result_df[['point_1', 'point_2', 'point_3', 'point_4']].applymap(replaceNm)
 
 
-# In[24]:
+# In[17]:
+
+result_df.sort('Score', ascending=False).head()
+
+
+# In[18]:
 
 result_df.sort('Score', ascending=False, inplace=True)
 money_saved = result_df.pop('money_saved')
 
 
-# In[26]:
+# In[19]:
 
 def to_datatable_json(df, fname):
     lst_of_lst = df.values.tolist()
@@ -184,27 +192,47 @@ def to_datatable_json(df, fname):
     json.dump(d, open('%s' % fname, 'w'))
 
 
-# In[27]:
+# In[20]:
 
 to_datatable_json(result_df, 'code/webappy/data/results.json')
 
 
-# In[28]:
+# In[21]:
 
 to_datatable_json(result_df.head(2), 'code/webappy/data/testing.json')
 
 
-# In[19]:
+# In[22]:
 
 sum(money_saved)
 
 
-# In[ ]:
+# In[28]:
 
-print lst_of_l
+miles_saved = result_df[~result_df['Extra Time'].str.contains('-')]
 
 
-# In[42]:
+# In[29]:
+
+miles_saved['Miles Saved'].mean()
+
+
+# In[30]:
+
+miles_saved['Miles Saved'].sum()
+
+
+# In[31]:
+
+df[(df.c_ride == 8116) & (df.mride == 8162)]
+
+
+# In[44]:
+
+result_df.head()
+
+
+# In[45]:
 
 def showNames(n):
     result_df['len_name'] = result_df[n].apply(lambda x: len(x))
@@ -212,40 +240,40 @@ def showNames(n):
     print a[n].unique()
 
 
-# In[110]:
+# In[46]:
 
 path_lst = ['c_ride', 'mride', 'st_astext', 'cpath', 'mpath']
 route_df = ride_shares[path_lst]
 
 
-# In[ ]:
+# In[47]:
+
+result_df.head()
 
 
-
-
-# In[114]:
+# In[48]:
 
 route_df['st_astext']  = route_df.st_astext.apply(path_parse)
 route_df['cpath'] = route_df.cpath.apply(path_parse)
 route_df['mpath'] = route_df.mpath.apply(path_parse)
 
 
-# In[119]:
+# In[ ]:
 
 route_df['combined_id'] = route_df.c_ride.map(int).map(str) + ',' + route_df.mride.map(int).map(str)
 
 
-# In[121]:
+# In[ ]:
 
 route_df.set_index('combined_id', inplace=True)
 
 
-# In[124]:
+# In[ ]:
 
 route_final = route_df[['st_astext', 'cpath', 'mpath']]
 
 
-# In[134]:
+# In[ ]:
 
 pwd
 
