@@ -1,8 +1,7 @@
 #RideMeter 
 ##Measuring the value of shared rides
-
 ###Project summary 
-This project takes (New York Taxi ride data from 2013)[!http://chriswhong.com/open-data/foil_nyc_taxi/] and calculate the amount of money/ miles that could be saved if rides are shared. A score is calculated to indicate how shareable each ride is. A webapp is also written in Flask for visualization of the shared path for each of hypothetical shared ride.  
+This project takes [New York Taxi ride data from 2013](http://chriswhong.com/open-data/foil_nyc_taxi/) and calculate the amount of money/ miles that could be saved if rides are shared. A score is calculated to indicate how shareable each ride is. A webapp is also written in Flask for visualization of the shared path for each of hypothetical shared ride.  
 
 ###Stage 0 
 ###Install OSRM routing API
@@ -31,7 +30,7 @@ preprocessing.py, query_osrm.py, match_rideshare.py and scoring_rideshare.py all
 
 ##Stage 2
 ###query_osrm.py
-Contains the class **QueryOSRM** which queries the OSRM routing API engine to get the routes between the pickup and dropoff locations of the taxi rides. **QueryOSRM** also merge pre-download data of (bounds of New York districts)[http://download.geofabrik.de/north-america/us/new-york.html] and decide what districts the pickup and dropoff points are. The route and district data is subsequently pushed into PostGres for later steps.
+Contains the class **QueryOSRM** which queries the OSRM routing API engine to get the routes between the pickup and dropoff locations of the taxi rides. **QueryOSRM** also merge pre-download data of [bounds of New York districts](http://download.geofabrik.de/north-america/us/new-york.html) and decide what districts the pickup and dropoff points are. The route and district data is subsequently pushed into PostGres for later steps.
 
 ##Stage 3
 ##match_rideshare.py
