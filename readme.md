@@ -1,10 +1,11 @@
 #RideMeter 
-##Measuring the value of shared rides
-###Project summary 
+###Measuring the value of shared rides
+
+##Project summary 
 This project takes [New York Taxi ride data from 2013](http://chriswhong.com/open-data/foil_nyc_taxi/) and calculate the amount of money/ miles that could be saved if rides are shared. A score is calculated to indicate how shareable each ride is. A webapp is also written in Flask for visualization of the shared path for each of hypothetical shared ride.  
 
-###Stage 0 
-###Install OSRM routing API
+##Stage 0 
+####Install OSRM routing API
 This project uses OSRM to get the route between 2 points and this is achieved by OSRM.
 
 Instructions are as below.
@@ -21,7 +22,7 @@ https://github.com/Project-OSRM/osrm-backend/wiki/Running-OSRM#extracting-the-ro
 https://github.com/Project-OSRM/osrm-backend/wiki/Server-api
 
 
-###Stage 1
+##Stage 1
 ####preprocessing.py, eda.py & db_interface.py
 preproessing.py contains the class **Preprocess** which cleans the data and push it into PostGres (POSTGIS) database.
 This is followed by some EDA(exploratory data analysis) to get a sense of how the data is like.
