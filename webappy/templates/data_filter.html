@@ -1,0 +1,211 @@
+<html><head>
+
+	
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<link rel="shortcut icon" type="image/ico" href="http://www.sprymedia.co.uk/media/images/favicon.ico">
+		
+		<title>Using DataTable with column filter plugin - Customize Filters</title>
+		<style type="text/css" title="currentStyle">
+			@import "media/css/demo_page.css";
+			@import "media/css/demo_table.css";
+			@import "media/css/themes/base/jquery-ui.css";
+			@import "media/css/themes/smoothness/jquery-ui-1.7.2.custom.css";
+		</style>
+
+        <script type="text/javascript" async="" src="https://ssl.google-analytics.com/ga.js"></script><script src="media/js/jquery-1.4.4.min.js" type="text/javascript"></script><style type="text/css"></style>
+        <script src="media/js/jquery.dataTables.js" type="text/javascript"></script>
+
+        <script src="media/js/jquery-ui.js" type="text/javascript"></script>
+
+        <script src="media/js/jquery.dataTables.columnFilter.js" type="text/javascript"></script>
+
+		<script type="text/javascript">
+$(document).ready(function(){
+                $.datepicker.regional[""].dateFormat = 'dd/mm/yy';
+                $.datepicker.setDefaults($.datepicker.regional['']);
+     $('#example').dataTable({
+		"aoColumns": [ 
+			{ "sWidth": "200px" },
+			null,
+			null
+		]
+	} )
+		  .columnFilter({ sPlaceHolder: "head:before",
+			aoColumns: [ { type: "text" },
+				     { type: "date-range" },
+                                     { type: "date-range"  }
+				]
+
+		});
+});
+
+		</script>
+        <script type="text/javascript">
+
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-17838786-4']);
+            _gaq.push(['_trackPageview']);
+
+            (function () {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+
+</script>
+	</head>
+
+
+
+
+<body id="dt_example" cz-shortcut-listen="true">
+		<div id="container">
+			<a href="index.html">Home</a>
+			<a href="http://code.google.com/p/jquery-datatables-column-filter/wiki/ColumnFilter">Wiki</a> 
+			<div class="full_width big">
+
+				JQuery DataTable Column Filter - Date Range filters
+			</div>
+			
+			<h1>Preamble</h1>
+			<p>
+				DataTables Column Filter add-on enables you to add date range filters where you can filter columns by start and end dates.
+			</p>
+
+			
+	
+			
+			
+			<h1>Live example</h1>
+
+
+
+
+
+
+
+			<div id="demo">
+ <div id="example_wrapper" class="dataTables_wrapper" role="grid"><div id="example_length" class="dataTables_length"><label>Show <select size="1" name="example_length" aria-controls="example"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select> entries</label></div><div class="dataTables_filter" id="example_filter"><label>Search: <input type="text" aria-controls="example"></label></div><table id="example" class="display dataTable" aria-describedby="example_info" style="width: 800px;">
+                    <thead>
+                        <tr role="row"><th style="width:150px" rowspan="1" colspan="1"><span class="filter_column filter_text"><input type="text" class="search_init text_filter form-control" value="Company name" rel="0"></span></th><th style="width:350px" rowspan="1" colspan="1"><span class="filter_column filter_date_range">From <input type="text" class="date_range_filter form-control hasDatepicker" id="example_range_from_1" rel="1"> to <input type="text" class="date_range_filter form-control hasDatepicker" id="example_range_to_1" rel="1"></span></th><th style="width:250px" rowspan="1" colspan="1"><span class="filter_column filter_date_range">From <input type="text" class="date_range_filter form-control hasDatepicker" id="example_range_from_2" rel="2"> to <input type="text" class="date_range_filter form-control hasDatepicker" id="example_range_to_2" rel="2"></span></th></tr>
+                        <tr role="row"><th class="sorting_asc" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Company name: activate to sort column descending" style="width: 208px;">Company name</th><th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label="Date Created: activate to sort column ascending" style="width: 215px;">Date Created</th><th class="sorting" role="columnheader" tabindex="0" aria-controls="example" rowspan="1" colspan="1" aria-label="Date Updated: activate to sort column ascending" style="width: 309px;">Date Updated</th></tr>
+                    </thead>
+
+                    
+                    <tfoot>
+
+                        <tr><th rowspan="1" colspan="1">Company name</th><th rowspan="1" colspan="1">Date Created</th><th rowspan="1" colspan="1">Date Updated</th></tr>
+                    </tfoot>
+                <tbody role="alert" aria-live="polite" aria-relevant="all"><tr class="odd">
+                            <td class=" sorting_1">(TCM)</td>
+                            
+                            <td class=" "></td>
+                            <td class=" ">15/05/2011 00:00:00</td>
+                        </tr><tr class="even">
+                            <td class=" sorting_1">102.2 Smooth FM</td>
+                            
+                            <td class=" ">12/06/2011</td>
+                            <td class=" ">26/07/2011 00:00:00</td>
+                        </tr><tr class="odd">
+                            <td class=" sorting_1">9PR</td>
+                            
+                            <td class=" ">30/07/2011</td>
+                            <td class=" ">14/10/2011 00:00:00</td>
+                        </tr><tr class="even">
+                            <td class=" sorting_1">Abacus Agent</td>
+                            
+                            <td class=" ">08/06/2011</td>
+                            <td class=" ">23/08/2011 00:00:00</td>
+                        </tr><tr class="odd">
+                            <td class=" sorting_1">Alexandra Theatre</td>
+                            
+                            <td class=" ">15/05/2011</td>
+                            <td class=" ">15/05/2011 00:00:00</td>
+
+                        </tr><tr class="even">
+                            <td class=" sorting_1">Artsun</td>
+
+                            
+                            <td class=" ">08/06/2011</td>
+                            <td class=" ">23/08/2011 00:00:00</td>
+                        </tr><tr class="odd">
+                            <td class=" sorting_1">Asadul Ltd</td>
+                            
+                            <td class=" ">13/07/2011</td>
+                            <td class=" ">12/09/2011 00:00:00</td>
+
+                        </tr><tr class="even">
+
+                            <td class=" sorting_1">Ashley Mark</td>
+                            
+                            <td class=" ">15/07/2011</td>
+                            <td class=" ">25/08/2011 00:00:00</td>
+                        </tr><tr class="odd">
+                            <td class=" sorting_1">Astra travel</td>
+                            
+                            <td class=" ">09/06/2011</td>
+                            <td class=" ">04/07/2011 00:00:00</td>
+                        </tr><tr class="even">
+                            <td class=" sorting_1">Atomic</td>
+
+                            
+                            <td class=" ">09/06/2011</td>
+                            <td class=" ">04/07/2011 00:00:00</td>
+                        </tr></tbody></table><div class="dataTables_info" id="example_info">Showing 1 to 10 of 100 entries</div><div class="dataTables_paginate paging_two_button" id="example_paginate"><a class="paginate_disabled_previous" tabindex="0" role="button" id="example_previous" aria-controls="example">Previous</a><a class="paginate_enabled_next" tabindex="0" role="button" id="example_next" aria-controls="example">Next</a></div></div>
+
+
+			</div>
+			<div class="spacer"></div>
+
+			
+			
+
+			
+			<h1>Initialization code</h1>
+			<p>In the initialization code you should place "date-range" as type of the column filter as shown below:</p>
+			<pre>		
+$(document).ready(function(){
+     $('#example').dataTable()
+		  .columnFilter({ 	sPlaceHolder: "head:before",
+					aoColumns: [ 	{ type: "text" },
+				    	 		{ type: "date-range" },
+                                    			{ type: "date-range" }
+						]
+
+		});
+});
+	</pre>
+<p>In this example is also placed filters before header row using the sPlaceHolder parameter. In this case you will need to add duplicate heading row after the first heading row in the THEAD tag. In this row will be injected filter controls and it will ba placed before heading row that is used by DataTables.</p>
+		<p>Note that date format of the cells must match the date format of the calendar. Filter uses Jquery Date picker UI regional setting and you can change this in the following code:</p>
+<pre>                $.datepicker.regional[""].dateFormat = 'dd/mm/yy';
+                $.datepicker.setDefaults($.datepicker.regional['']);
+</pre>
+
+
+			<h1>Other examples</h1>
+			<ul>
+
+				<li><a href="default.html">Basic usage</a></li>
+				<li><a href="customFilters.html">Custom filters</a></li>
+				<li><a href="dateRange.html">Date ranges</a></li>
+				<li><a href="numberRange.html">Number ranges</a></li>
+				<li><a href="ajaxSource.html">Ajax source filtering</a></li>
+				<li><a href="serverSide.html">Server-side filtering</a></li>
+                		<li><a href="regex.html">Regular expression filtering</a></li>
+		        	<li><a href="external.html">Filtering via external form</a></li>
+			</ul>
+			
+			<div id="footer" style="text-align:center;">
+				<span style="font-size:10px;">
+					DataTables Column Filter Add-on © Jovan Popovic 2011.<br>
+					DataTables designed and created by <a href="http://www.sprymedia.co.uk">Allan Jardine</a> © 2007-2011<br>
+				</span>
+			</div>
+		</div>
+	
+
+
+
+
+
+<div id="ui-datepicker-div" class="ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all" style="position: absolute; top: 298.328125px; left: 634.875px; z-index: 1; display: none;"><div class="ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-all"><a class="ui-datepicker-prev ui-corner-all" onclick="DP_jQuery_1416089176240.datepicker._adjustDate('#example_range_to_1', -1, 'M');" title="Prev"><span class="ui-icon ui-icon-circle-triangle-w">Prev</span></a><a class="ui-datepicker-next ui-corner-all" onclick="DP_jQuery_1416089176240.datepicker._adjustDate('#example_range_to_1', +1, 'M');" title="Next"><span class="ui-icon ui-icon-circle-triangle-e">Next</span></a><div class="ui-datepicker-title"><span class="ui-datepicker-month">November</span>&nbsp;<span class="ui-datepicker-year">2014</span></div></div><table class="ui-datepicker-calendar"><thead><tr><th class="ui-datepicker-week-end"><span title="Sunday">Su</span></th><th><span title="Monday">Mo</span></th><th><span title="Tuesday">Tu</span></th><th><span title="Wednesday">We</span></th><th><span title="Thursday">Th</span></th><th><span title="Friday">Fr</span></th><th class="ui-datepicker-week-end"><span title="Saturday">Sa</span></th></tr></thead><tbody><tr><td class=" ui-datepicker-week-end ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">1</a></td></tr><tr><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">2</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">3</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">4</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">5</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">6</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">7</a></td><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">8</a></td></tr><tr><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">9</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">10</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">11</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">12</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">13</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">14</a></td><td class=" ui-datepicker-week-end ui-datepicker-days-cell-over  ui-datepicker-today" onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default ui-state-highlight ui-state-hover" href="#">15</a></td></tr><tr><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">16</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">17</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">18</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">19</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">20</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">21</a></td><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">22</a></td></tr><tr><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">23</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">24</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">25</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">26</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">27</a></td><td class=" " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">28</a></td><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">29</a></td></tr><tr><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1416089176240.datepicker._selectDay('#example_range_to_1',10,2014, this);return false;"><a class="ui-state-default" href="#">30</a></td><td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" ui-datepicker-week-end ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td></tr></tbody></table></div><div id="window-resizer-tooltip" style="display: none;"><a href="#" title="Edit settings" style="background-image: url(chrome-extension://kkelicaakdanhinjdeammmilcgefonfh/images/icon_19.png);"></a><span class="tooltipTitle">Window size: </span><span class="tooltipWidth" id="winWidth">1280</span> x <span class="tooltipHeight" id="winHeight">705</span><br><span class="tooltipTitle">Viewport size: </span><span class="tooltipWidth" id="vpWidth">1280</span> x <span class="tooltipHeight" id="vpHeight">335</span></div></body></html>
