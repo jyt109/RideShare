@@ -38,8 +38,8 @@ Contains the class **QueryOSRM** which queries the OSRM routing API engine to ge
 ##Stage 3
 ####match_rideshare.py
 Contains the class MatchRideShare that does the matching of rides that could be shared and then filter by various conditions to trim down the number of matched rides to good quality ones for querying and other more expensive computation downstream.
-
-##Stage4
+ 
+##Stage 4
 ####scoring_rideshare.py
 Contains the class ScoringRideShare that scores the filtered rides from Stage 3 and pick the best ride that has the top score. This results in 7,847 / 24,864 rides being matched. This module needs cleaning up. Most of the code is still in an IPython notebook. 
 
@@ -47,6 +47,11 @@ Contains the class ScoringRideShare that scores the filtered rides from Stage 3 
 ####webappy
 The folder webappy contain the whole Flask webapp that does the visualization and loading of the 7,847 shared ride entries into a table for browsing.
 
+The file structure of webappy follows the standard Flask structure:
+- **templates** contains the Jinja HTML files
+- **app.py** handles the server-side processing
+- **static** contains all the JS and CSS libraries
+- **data** contains the results from **Stage 4** formatted in a way that can be read into the web app
 
 
 
