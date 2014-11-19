@@ -22,26 +22,26 @@ https://github.com/Project-OSRM/osrm-backend/wiki/Server-api
 
 
 ###Stage 1
-###preprocessing.py & eda.py & db_interface.py
+####preprocessing.py, eda.py & db_interface.py
 preproessing.py contains the class **Preprocess** which cleans the data and push it into PostGres (POSTGIS) database.
 This is followed by some EDA(exploratory data analysis) to get a sense of how the data is like.
 db_interface.py contains the class **DBRideShare** which handles all the interaction with the database.
 preprocessing.py, query_osrm.py, match_rideshare.py and scoring_rideshare.py all inherit from the **DBRideShare** class
 
 ##Stage 2
-###query_osrm.py
+####query_osrm.py
 Contains the class **QueryOSRM** which queries the OSRM routing API engine to get the routes between the pickup and dropoff locations of the taxi rides. **QueryOSRM** also merge pre-download data of [bounds of New York districts](http://download.geofabrik.de/north-america/us/new-york.html) and decide what districts the pickup and dropoff points are. The route and district data is subsequently pushed into PostGres for later steps.
 
 ##Stage 3
-##match_rideshare.py
+###match_rideshare.py
 Contains the class MatchRideShare that does the matching of rides that could be shared and then filter by various conditions to trim down the number of matched rides to good quality ones for querying and other more expensive computation downstream.
 
 ##Stage4
-##scoring_rideshare.py
+###scoring_rideshare.py
 Contains the class ScoringRideShare that scores the filtered rides from Stage 3 and pick the best ride that has the top score. This results in 7,847 / 24,864 rides being matched. This module needs cleaning up. Most of the code is still in an IPython notebook. 
 
 ##Final Stage
-##webappy
+###webappy
 The folder webappy contain the whole Flask webapp that does the visualization and loading of the 7,847 shared ride entries into a table for browsing.
 
 
