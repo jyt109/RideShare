@@ -2,70 +2,24 @@
 {% block title %}RideViz{% endblock %}
 {% block head %}
     {{ super() }}
-        <script type="text/javascript" language="javascript" src="../static/DataTables-1.10.4/media/js/jquery.dataTables.js"></script>
-        <script type="text/javascript" src="../static/js/search.js"></script>
-        <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.js"></script>
-        <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.css">
-        <link rel="stylesheet" type="text/css" href="../static/css/tooltip.css">
+
+    <script type="text/javascript" language="javascript" src="../static/DataTables-1.10.4/media/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" src="../static/js/search.js"></script>
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+    <script type="text/javascript" language="javascript" src="../static/js/helper.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/plug-ins/9dcbecd42ad/integration/bootstrap/3/dataTables.bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/tooltip.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/ridemeter.css">
 
     <script>
-           function format (d) {
-                var ride1P = d[6],
-                ride2P = d[7];
-                if (d[10] === "1") {
-                    var ride1D = d[8],
-                    ride2D = d[9];
-                } else if(d[10] === "2"){
-                    var ride1D = d[8],
-                    ride2D = d[9];                                
-                } else {
-                    console.log('unknown ride type');
-                }
-    
-                // `d` is the original data object for the row
-                return '<div class="extraInfoDiv">' +
-                            '<div>' +
-                                '<p class="rideInfoa zero">Ride A: &nbsp</p>' +
-                                '<p class="rideInfoa one">' + ride1P + '<img src="../static/images/glyphicons_217_circle_arrow_right.png" class="right_arr"></p>' +
-                                '<p class="rideInfoa two">' + ride1D + '</p>'+ '<div class="spacer"></div>' + 
-                            '</div>' +
-
-                            '<div>' +
-                                '<p class="rideInfob zero">Ride B: &nbsp</td>' +
-                                '<p class="rideInfob one">' + ride2P + '<img src="../static/images/glyphicons_217_circle_arrow_right.png" class="right_arr"></p>' +
-                                '<p class="rideInfob two">' + ride2D + '</p>'+
-                            '</div>' +
-                        '</div>' +            
-                        '<button onClick="get_ride_share()" type="submit" name="submit" class="btn btn-danger route_btn" disabled>Ride Share</button>'; 
-        };
-
-        function parse_to_float(data) {
-            var lst = [];
-            for (var i=0; i < data.length; i++) {
-                lst.push(data[i].map(parseFloat));
-            }
-            return lst
-        }
-
-        function click_to_remove() {
-            map.removeLayer(cline);
-            map.removeLayer(mline);
-            map.removeLayer(start_blue_mark);
-            map.removeLayer(end_blue_mark);
-            map.removeLayer(start_green_mark);
-            map.removeLayer(end_green_mark);
-            $('.leaflet-zoom-hide').remove()
-        }
-
-        function hideLoading() {
-            $('#loading').removeClass('work');
-        };
-        function showLoading() {
-            $('#loading').addClass('work');
+        function clickFirstRow() {
+            //click the first entry after the label is loaded
+            $('tr.odd:first-child').click();
         };
 
         //calling data to map
-        $(document).ready(function(){  
+        $(document).ready(function(){
             var table = $('#rs_entries').DataTable({
                 'ajax': {
                     'url': 'readjson',
@@ -74,7 +28,7 @@
                 "order": [[ 5, "desc" ]],
                 "bDeferRender": true,
                 "bProcessing": false,
-                "bStateSave": true,
+                "bStateSave": false,
                 "iDisplayLength": 5,
                 "bFilter": true,
                 "bAutoWidth": false,
@@ -86,14 +40,6 @@
                     { "data": 4, "orderable": true},
                     { "data": 5, "orderable": true},
                 ],
-                "preDrawCallback" : function (OSettings){
-                    // setTimeout(function() {
-                    //     $('#rs_entries').find('tbody tr').css('background-color', 'white');
-                    //     $('tr:has(".extraInfoDiv")').remove();
-                    //     $('#rs_entries tbody tr').removeClass('shown');                    
-                    // }, 00);
-                    // showLoading();
-                },
 
                 "fnInitComplete" : function (oSettings,json) {
                     // remove the loading pandas
@@ -102,23 +48,23 @@
                         //set the background color
                         $('#rs_entries').find('tbody tr').css('background-color', 'white');
                         $(this).css('background-color', 'rgba(70, 130, 180, 0.2)');
-                        
+
                         //remove any previous extra info tables and add in the new one
                         var table1 = $('#rs_entries').DataTable(); //row methods
                         var tr = $(this).closest('tr'); //return dom
                         var row1 = table1.row(tr); //return data
-                        
-                        
+                        // debugger;
+
                         if ( row1.child.isShown() ) {
                             row1.child.hide();
                             tr.removeClass('shown');
                         }
-                   
+
                         $('tr.shown + tr').remove();
                         $('tr.shown').removeClass('shown');
-                        row1.child( format(row1.data()) ).show();
+                        row1.child(format(row1.data())).show();
                         tr.addClass('shown');
-                        
+
 
                         //get row data
                         var table2 = $('#rs_entries').dataTable();
@@ -133,7 +79,7 @@
                            'type' : 'POST',
                            'contentType' : 'application/json',
                            'success' : function(data) {
-                                //disable button to get share ride 
+                                //disable button to get share ride
                                 //until the current row of rides are registered
                                 $("button").prop("disabled",true);
                                 // Remove the route on the map and the shared moving path
@@ -141,7 +87,7 @@
                                     click_to_remove();
                                 }
                                 console.log('Receive routes');
-                                
+
                                 var json_data = JSON.parse(data);
 
                                 var croute = parse_to_float(json_data[0]),
@@ -157,9 +103,9 @@
                                     longer_route = croute;
                                 }
 
-                                window.cline = L.polyline(croute, {'color': 'blue', 
+                                window.cline = L.polyline(croute, {'color': 'blue',
                                                                 'weight': 6}).addTo(map);
-                                window.mline = L.polyline(mroute, {'color': 'green', 
+                                window.mline = L.polyline(mroute, {'color': 'green',
                                                                 'weight': 6}).addTo(map);
                                 map.setView(longer_route[mid_point], 13);
 
@@ -180,7 +126,7 @@
 
                                 //make multiple popup open together
                                 function marker_pop_bind(marker, content) {
-                                    marker.bindPopup(content, {'closeButton': false, 
+                                    marker.bindPopup(content, {'closeButton': false,
                                                                 'minWidth': 0,
                                                                 'maxHeight': 20,
                                                                 'closeOnClick': false});
@@ -191,7 +137,7 @@
 
                                 marker_pop_bind(start_green_mark, '<div class="greenm">Start B</div>');
                                 marker_pop_bind(end_green_mark, '<div class="greenm">End B</div>');
-                                //re-enable button after the shared path has been set right 
+                                //re-enable button after the shared path has been set right
                                 //to allow the moving path to be called again
                                 $("button").prop("disabled",false);
 
@@ -201,242 +147,46 @@
                            }
                         }); //end of ajax
                     }); //end of on click
-                    // debugger;
-                    //click the first entry after the label is loaded
-                    $('tr.odd:first-child').click();
                 }, //end of fnInitComplete
+
+                "fnPreDrawCallback" : function (OSettings){
+                    clearClickedOnPage();
+                },
+
                 /////CALL BACK
                 "fnDrawCallback" : function (oSettings){
-                    var table = $('#rs_entries').dataTable();
                     hideLoading();
+                    setTimeout(function(){
+                        clickFirstRow();
+                    }, 200);
                 } // end of fnDrawCallback
                 /////
 
-
             }); //end of datatable (just before ready document)
+
             // Score filter(custom function in search.js) and show the loading icon
             $('#searchScoreBtn').on('click', function() {
+                // clearClickedOnPage();
                 showLoading();
-                setTimeout(function() {table.draw();}, 100);
+                setTimeout(function() {table.draw();}, 200);
             });
-            //Removing the general search box without disabling filter (we all know how painful that can be)
+            // Make sure all search buttons remain black after clicked
+            $('.searchBtn').on('click', function () {$(this).css('background-color', 'black');});
+
+            //Removing the general search box without disabling filter
+            //(we all know how painful that can be)
             $('#rs_entries_filter').remove()
             //remove the show 10 entries drop down
             $('.dataTables_length').remove();
-            //searchbutton
-            $('.searchBtn').on('click', function () {$(this).css('background-color', 'black');} );
             $('.tooltipHeader').tooltip();
-            // table.on('draw', function() {showLoading();});
 
         }); //document ready end
         //add ride share moving path
         function get_ride_share() {
             movingPath('return_ride_share');
-        } 
+        }
     </script>
     <style>
-        #map {
-            height: 500px;
-            width: 530px;
-            float: left;
-            margin-left: 30px;
-        }
-        .table tbody tr[role=row] td:nth-child(1),
-         .table tbody tr[role=row] td:nth-child(2) {
-            /*font-weight: bold;*/
-        }
-        .table {
-            width: 560px;
-/*            width: 100%;
-            height: 100%;
-*/        }
-        .table tbody tr.even:hover,
-        .table tbody tr.odd:hover{
-            cursor: pointer;
-            background-color: rgb(0, 0, 0);
-            background-color: rgba(70, 130, 180, 0.1) !important; 
-        }
-        .main_container {
-            width: 1200px;
-            padding-top: 20px;
-            padding-bottom: 20px;
-            margin-left: auto ;
-            margin-right: auto ;
-        }
-        table.dataTable thead .sorting_asc, 
-        table.dataTable thead .sorting_desc {
-            background: none;
-        }
-        .table tr td {
-            font-size: 13px;
-            text-align: center;
-        }
-        .table th {
-            text-align: center;
-        }
-        .dataTables_info {
-            font-size: 12px;
-            opacity: 0.4;
-            width: 30px;
-        }
-        div.dataTables_paginate ul.pagination {
-            margin: 5px 0px 0px -100px;
-        }
-        .pagination>li>a, .pagination>li>span {
-            padding: 4px 9px;
-            font-size: 12px;
-        }
-        #tab { /* table div container */
-            float: left;
-            margin-left: 30px;
-        }
-        .bluem, .greenm {
-            font-weight: bold;
-        }
-        .bluem {
-            color: #00688B;
-        }
-        .greenm {
-            color: #009900;
-        }
-
-        .leaflet-popup-content-wrapper,
-        .leaflet-popup-tip {
-            box-shadow: 0;
-            opacity: 0.6;
-            height: 20px;
-            padding-top: 0;
-        }
-
-        .leaflet-popup-tip {
-            width: 5px;
-        }
-        .table>thead>tr>th, .table>tbody>tr>th,
-        .table>tfoot>tr>th, .table>thead>tr>td,
-        .table>tbody>tr>td, .table>tfoot>tr>td {
-            padding: 8px;
-        }
-
-        .searchBox {
-            height: 25px;
-            font-size: 14px;
-            width: 60px;
-            font-weight: normal;
-            color: black;
-        }
-        .searchBtn {
-            letter-spacing: 1px;
-            font-size: 12px;
-            padding-top: 3px;
-            padding-bottom: 3px;
-            padding-left: 10px;
-            padding-right: 10px;
-            background-color: black;
-            border-color: black;
-            font-weight: bold;
-        }
-        .searchBtn:hover {
-            background-color: black;
-            border-color: #BEBEBE;
-        }
-        #searchBtnTab td, #searchBtnTab th {
-            padding-top: 5px;
-            padding-bottom: 5px;
-            padding-left: 10px;
-            padding-right: 10px;
-        }
-        #searchBtnTab td.searchTerm {
-            font-size: 16px;
-            color: #383838;
-            opacity: 0.7;
-            padding-top: 26px;
-        }
-        h2 {
-            margin-top: 0px;
-            margin-bottom: 0px;
-            text-align: left;
-            float: left;
-        }
-        #titleRideShare{
-            width: 600px;
-        }
-        #searchBtnTab {
-            /*margin-left: 15px;*/
-            margin-bottom: 0px; /*///*/
-            clear: left;
-        }
-        #loading {
-            visibility: hidden;
-        }
-        #loading.work {
-            visibility: visible;
-        }
-
-        #loadImg {
-            width:60%;
-            height:50%;
-        }
-        #rs_entries th a {
-            font-size: 14px;
-        }
-        #rs_entries th a:hover {
-            text-decoration: none;
-        }
-        .smallPrint {
-            font-size: 10px;
-            font-weight: 500;
-        }
-        .extraInfoDiv {
-            float: left;
-            width: 370px;
-        }
-
-        .extraInfoDiv p {
-            font-size: 12px;
-            font-weight: 500;
-            float:left;
-            padding: 5px 0px 7px 5px;
-        }
-        .extraInfoDiv p.rideInfoa {
-            color: blue;
-            opacity: 0.6;
-        }
-        .extraInfoDiv p.rideInfob {
-            color: green;
-            opacity: 0.6;
-        }
-        .route_btn {
-            float: left;
-            font-size: 13px;
-            margin-top: 15px;
-            /*margin-left: 60px;*/
-            padding-left: 7px;
-            padding-right: 7px;
-            background-color: #FF3333;
-            opacity: 0.8;
-            letter-spacing: 1px;
-            font-weight: 500;
-        }
-        img.right_arr {
-            padding-left: 7px;
-            vertical-align: middle;
-        }
-        .extraInfoDiv .one{
-            padding-top: 2px;
-        }
-        .extraInfoDiv p {margin: 0;}
-        .spacer {clear: both;}
-        .extraInfoDiv .zero{
-            font-weight: bold;
-            font-size: 13px;
-            padding-left: 25px;
-        }
-        .floaterDiv {
-            float: left;
-        }
-        .blueClick {
-            background-color: rgba(70, 130, 180, 0.2);
-        }
 
 
     </style>
@@ -455,7 +205,7 @@
                  <tr>
                     <td class='searchTerm'>Ride Share Score<br><p class='smallPrint'>Bigger Score = Better Ride (1- 100)</p></td>
 
-                    <td><input type="text" id="min" name="min" class='searchBox form-control' maxlength='4' placeholder='MIN'></td>                    
+                    <td><input type="text" id="min" name="min" class='searchBox form-control' maxlength='4' placeholder='MIN'></td>
                     <td><input type="text" id="max" name="max" class='searchBox form-control' maxlength='4' placeholder='MAX'></td>
                     <td> <button class="btn btn-warning searchBtn" id="searchScoreBtn">Go</button> </td>
                     <td><div id="loading"><img src="../static/images/loading.png" id="loadImg"></div></td>
@@ -463,7 +213,7 @@
                 </tr>
 
 <!--                 <tr>
-                    <td><input type="text" id="min" name="min" class='searchBox form-control' maxlength='4'></td>                    
+                    <td><input type="text" id="min" name="min" class='searchBox form-control' maxlength='4'></td>
                     <td class='searchTerm'><&nbsp Ride Share Score &nbsp< </td>
                     <td><input type="text" id="max" name="max" class='searchBox form-control' maxlength='4'></td>
                     <td></td>
