@@ -1,182 +1,206 @@
+from sql_queries import SqlQueries
 import pandas as pd
-import subprocess
 import os
 from time import time
-from sqlalchemy import create_engine, MetaData
-from psqlSetup import DBRideShare
-from collections import OrderedDict
-import psycopg2
 
-class PreProcessing(DBFunction):
-    '''
-    PARENT: DBFunction
-    CHILD: None
 
-    - Reads in the taxi data from csv into pandas
-    - Subset from csv
-    - Clean data
-    '''
+class Preprocessing(SqlQueries):
+    """INPUT:
+    - month(INT) [Month of the taxi rides]
+    - day_rng(LIST OF 2, OPT) [From what day to what day in the month]
+    - hour_rng(LIST OF 2, OPT) [From nth hour on day 1 to nth hour in last day]
+
+    OUTPUT:
+    - NONE
+
+    DOC:
+    - Please specify day_rng and hour_rng since processing the whole month
+      is heavy work for python
+    - Read in a subset of the NYC taxi ride data
+    - Cleaning it and put it into the DB"""
+
     def __init__(self, month=11, day_rng=None, hour_rng=None):
-        super(DBFunction, self).__init__() 
+        super(Preprocessing, self).__init__()
         self.month = month
         self.day_rng = day_rng
         self.hour_rng = hour_rng
-        self.csv_path = None 
+        self.fare_path = '../data/faredata2013'
+        self.trip_path = '../data/tripData2013'
+        self.fare_fname = os.path.join(self.fare_path,
+                                       'trip_fare_%s.csv' % self.month)
+        self.trip_fname = os.path.join(self.trip_path,
+                                       'trip_data_%s.csv' % self.month)
+        self.clean_fname = os.path.join('../data', 'clean_trip_fare.csv')
+        # Variables where functions below will write to
+        self.trip_df = pd.DataFrame()
+        self.fare_df = pd.DataFrame()
+        self.trip_fare_df = pd.DataFrame()
+        self.cleaned_df = pd.DataFrame()
 
     def read_df(self):
         '''
-        INPUT: None
-        OUTPUT: (DATAFRAME, DATAFRAME) (fare and trip)
+        INPUT:
+        - NONE
 
-        - Read in from csv to pandas
+        OUTPUT:
+        - (TUPLE OF 2 DATAFRAMES) [trip and fare dfs]
+
+        DOC:
+        - Read in a subset of the NYC taxi ride data
+        - Cleaning it and put it into the DB
         '''
-
         print 'Reading in files ...'
         st_ts = time()
-        trip_fname = '../data/tripData2013/trip_data_%s.csv' % self.month
-        fare_fname = '../data/faredata2013/trip_fare_%s.csv' % self.month
 
-        trip = pd.read_csv(trip_fname)
-        fare = pd.read_csv(fare_fname)
+        # Read in file names as specified in init
+        trip = pd.read_csv(self.trip_fname)
+        fare = pd.read_csv(self.fare_fname)
 
-        # strip spaces in col names
+        # Strip spaces in col names
         fare.columns = [col.strip() for col in fare.columns]
         trip.columns = [col.strip() for col in trip.columns]
 
-        # convert corresponding columns to datetime
+        # Convert corresponding columns to datetime
         trip['pickup_datetime'] = pd.to_datetime(trip['pickup_datetime'])
         trip['dropoff_datetime'] = pd.to_datetime(trip['dropoff_datetime'])
         fare['pickup_datetime'] = pd.to_datetime(fare['pickup_datetime'])
 
-        print 'Done in: %d seconds' % (time() - st_ts) 
+        print 'Done in: %d seconds' % (time() - st_ts)
 
-        return (trip, fare)
+        self.trip_df = trip
+        self.fare_df = fare
 
-
-    def joining_df(self, trip, fare):
+    def join_df(self):
         '''
-        INPUT: DATAFRAME, DATAFRAME
-        OUTPUT: DATAFRAME
+        INPUT:
+        - trip (PANDAS DATAFRAME) [Trip info from read_df(), init]
+        - fare (PANDAS DATAFRAME) [Fare info from read_df(), init]
 
-        - Joining the trip dataframe with fare dataframe
+        OUTPUT:
+        - (DATAFRAME) [Joint trip and fare info]
+
+        DOC:
+        - Joining the 2 dataframes on common unique keys
         '''
+        if self.trip_df.empty or self.fare_df.empty:
+            print 'Run read_df first... This will throw an error.'
 
         print 'Joining trip and fare DataFrames ...'
         st_ts = time()
-        trip.set_index('pickup_datetime', inplace=True, drop=False)
 
-        # select rides in time window if day and time are specified
+        # Set pickupdatetime as index on trip df
+        self.trip_df.set_index('pickup_datetime', inplace=True, drop=False)
+
+        # Select trips in time window if day and time are specified
         if self.day_rng and self.hour_rng:
-            start_time = '2013-%02d-%02d %02d:00:00' % (self.month, self.day_rng[0], self.hour_rng[0])
-            end_time = '2013-%02d-%02d %02d:00:00' % (self.month, self.day_rng[1], self.hour_rng[1])
-            trip.sort('pickup_datetime', inplace=True)
-            trip = trip.ix[start_time : end_time]
+            start_time = '2013-%02d-%02d %02d:00:00' %  \
+                         (self.month, self.day_rng[0], self.hour_rng[0])
+            end_time = '2013-%02d-%02d %02d:00:00' % \
+                       (self.month, self.day_rng[1], self.hour_rng[1])
+            self.trip_df = self.trip_df.ix[start_time: end_time]
         else:
-            'Day and hour range not specified! The whole set is being used and it is big ...'
+            print 'Day and hour range not specified. Using the month'
 
+        # Specify the columns to keep in trip and fare dfs
         trip_keep = ['medallion', 'hack_license', 'pickup_datetime',
-                    'dropoff_datetime', 'passenger_count',
-                    'trip_time_in_secs', 'trip_distance',
-                    'pickup_longitude', 'pickup_latitude',
-                    'dropoff_longitude', 'dropoff_latitude']
+                     'dropoff_datetime', 'passenger_count',
+                     'trip_time_in_secs', 'trip_distance',
+                     'pickup_longitude', 'pickup_latitude',
+                     'dropoff_longitude', 'dropoff_latitude']
 
-        fare_keep = ['medallion', 'hack_license', 'pickup_datetime', 'fare_amount', 'total_amount']
-        subtrip = trip[trip_keep]
-        subfare = fare[fare_keep]
+        fare_keep = ['medallion', 'hack_license', 'pickup_datetime',
+                     'fare_amount', 'total_amount']
+        subtrip = self.trip_df[trip_keep]
+        subfare = self.fare_df[fare_keep]
 
-        # merging the 2 dfs
+        # Merging the 2 dfs
         merge_on = ['medallion', 'hack_license', 'pickup_datetime']
-        trip_fare = pd.merge(subtrip, subfare, left_on=merge_on, right_on=merge_on)
+        trip_fare = pd.merge(subtrip, subfare,
+                             left_on=merge_on,
+                             right_on=merge_on)
 
+        # Deleting excess columns
         del trip_fare['medallion']
         del trip_fare['hack_license']
-        print 'Done in: %d seconds' % (time() - st_ts) 
 
-        return trip_fare
+        print 'Done in: %d seconds' % (time() - st_ts)
 
-    def cleaning(self, trip_fare, dump=True, fname='clean_trip_fare.csv'):
+        self.trip_fare_df = trip_fare
+
+    def clean_df(self):
         '''
-        INPUT: DATAFRAME, BOOL(OPTIONAL), STRING(OPTIONAL - filename)
-        OUTPUT: DATAFRAME
+        INPUT:
+        - trip_fare(PANDAS DATAFRAME) [From joining_df(), init]
 
-        - Some basic cleaning to get rid of obviously wrong entries
+        OUTPUT:
+        - clean_trip_fare(PANDAS DATAFRAME)
+
+        DOC:
+        - Clean the data and dump into DB
         '''
+        if self.trip_fare_df.empty:
+            print 'Run join_df first. This will throw an error.'
 
         print 'Cleaning ...'
         st_ts = time()
 
-        # conditions: passenger count, positive trip distance, lat/long bound
-        c1 = trip_fare.passenger_count.isin(range(1, 4))
-        c2 = trip_fare.trip_distance > 0
-        c3 = trip_fare.trip_time_in_secs > 0
-        c4 = (trip_fare.pickup_latitude.between(40., 43.)) & (trip_fare.dropoff_latitude.between(40., 43.))
-        c5 = (trip_fare.pickup_longitude.between(-74., -70.)) & (trip_fare.dropoff_longitude.between(-74., -70.))
-        
-        clean_trip_fare = trip_fare[c1 & c2 & c3 & c4 & c5]
+        # Only rides with 1 to 3 passengers
+        c_a = self.trip_fare_df['passenger_count'].isin(range(1, 4))
+        # Only rides with some distance
+        c_b = self.trip_fare_df['trip_distance'] > 0
+        # Only rides with some time
+        c_c = self.trip_fare_df['trip_time_in_secs'] > 0
+        # Only rides within the bounds of NYC
+        c_d = (self.trip_fare_df['pickup_latitude'].between(40., 43.)) & \
+              (self.trip_fare_df['dropoff_latitude'].between(40., 43.))
+        c_e = (self.trip_fare_df['pickup_longitude'].between(-74., -70.)) & \
+              (self.trip_fare_df['dropoff_longitude'].between(-74., -70.))
+
+        clean_trip_fare = self.trip_fare_df[c_a & c_b & c_c & c_d & c_e]
+
+        # Give the rides id based on pickup time
+        clean_trip_fare.sort('pickup_datetime', inplace=True)
         clean_trip_fare['ride'] = range(1, clean_trip_fare.shape[0] + 1)
 
         print 'Done in: %d seconds' % (time() - st_ts)
 
-        # get the path the code is running and write data to file 
-        if dump:
-            clean_trip_fare.to_csv('../data/%s' % fname, index=False)
-            os.chdir('..')
-            self.csv_path = os.path.join(os.getcwd(), 'data/%s' % fname)
+        print 'Writing to CSV...'
+        clean_trip_fare.to_csv(self.clean_fname, index=False)
 
-        return clean_trip_fare
+        self.cleaned_df = clean_trip_fare
 
-    def write_trip_fare_psql(self, table_name):
+    def create_table_trip_fare(self):
         '''
-        Writing the data to psql
-        Small enough to write using to_sql
+        INPUT:
+        - NONE
+
+        OUTPUT:
+        - NONE
+
+        DOC:
+        - Write the ride data from CSV to PostGres DB
         '''
-        print 'Writing data to %s ...' % table_name
         st_ts = time()
 
-        name_type = \
-        ['pickup_datetime', 'timestamp without time zone',
-        'dropoff_datetime', 'timestamp without time zone',
-        'passenger_count', 'int',
-        'trip_time_in_secs', 'int',
-        'trip_distance', 'double precision',
-        'pickup_longitude', 'double precision',
-        'pickup_latitude', 'double precision',
-        'dropoff_longitude', 'double precision',
-        'dropoff_latitude', 'double precision',
-        'fare_amount', 'double precision',
-        'total_amount', 'double precision',
-        'ride', 'bigint']
-        indexes = ['ride', 'pickup_datetime', 'dropoff_datetime'] 
+        name_type = '''
+                    pickup_datetime   timestamp without time zone
+                    dropoff_datetime  timestamp without time zone
+                    passenger_count   int
+                    trip_time_in_secs int
+                    trip_distance     double precision
+                    pickup_longitude  double precision
+                    pickup_latitude   double precision
+                    dropoff_longitude double precision
+                    dropoff_latitude  double precision
+                    fare_amount       double precision
+                    total_amount      double precision
+                    ride              bigint
+                    '''
+        indexes = ['ride', 'pickup_datetime', 'dropoff_datetime']
+        # Absolute path of the CSV file
+        csv_path = os.path.abspath(self.clean_fname)
 
-        create_table_q = super(Csv2psql, self).sql4createTable(table_name, name_type, indexes)
-        self.cursor.execute(create_table_q)
-        self.conn.commit()
-        super(Csv2psql, self).copyToTable(table_name, self.csv_path, self.cursor, self.conn)
-        self.conn.close()
+        self.sql_create_table(self.t_ride, name_type, indexes)
+        self.sql_copy_to_table(self.t_ride, csv_path)
+
         print 'Done in: %d seconds' % (time() - st_ts)
-
-
-if __name__ == '__main__':
-    preprocess = PreProcessing(month=11, day_rng=[4, 4], hour_rng=[8, 9])
-    # Done in: 84 seconds 
-    trip, fare = preprocess.reading_df()
-    # Done in: 64 seconds 
-    trip_fare = preprocess.joining_df(trip, fare)
-    # Done in: 0 seconds 
-    clean_trip_fare = preprocess.cleaning(trip_fare)
-    # Done in: 0 seconds 
-    preprocess.write_trip_fare_psql('rides_11_4_8')
-
-# At this point all data are written cleansed and stored in psql
-
-
-
-
-
-
-
-
-        
-
-
-
