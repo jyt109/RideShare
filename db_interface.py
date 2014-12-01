@@ -1,12 +1,12 @@
 import subprocess
 import os
-# import time
-# import datetime
-# import json
 import re
 import psycopg2
 from psycopg2 import ProgrammingError
 from sqlalchemy import create_engine
+# import time
+# import datetime
+# import json
 # import pandas as pd
 # import pandas.io.sql as pdsql
 
@@ -57,6 +57,9 @@ class PsqlInterface(object):
 
         # SQL file to be loaded in (Filled in by convert_geojson_to_sql)
         self.sql_fname = ''
+
+        # The table name of the SQL file to be loaded in
+        self.sql_load_table_name = ''
 
     def sql_create_db(self):
         """INPUT:
@@ -240,6 +243,14 @@ class PsqlInterface(object):
         shp_f = '%s.shp' % fname
         sql_f = '%s.sql' % fname
 
+        # Remove previously created files to avoid confusion
+        print 'Removing previous files...'
+        for ext in ['.dbf', '.prj', '.shp', '.shx']:
+            try:
+                os.remove(fname + ext)
+            except OSError as err:
+                print err
+
         # Use shell command to convert to shape file
         print 'geojson to shp...'
         shp_cmd = 'ogr2ogr -progress -f "ESRI Shapefile" %s %s OGRGeoJSON' % \
@@ -248,7 +259,7 @@ class PsqlInterface(object):
 
         # Use shell command to convert shape to sql
         print 'shp to sql...'
-        #-S give us LineString instead of MultiLineString
+        # -S give us LineString instead of MultiLineString
         if single_geom:
             subprocess.call('shp2pgsql -I -s 4326 -S %s %s > %s' %
                             (shp_f, table_name, sql_f), shell=True)
@@ -256,16 +267,20 @@ class PsqlInterface(object):
             subprocess.call('shp2pgsql -I -s 4326 %s %s > %s' %
                             (shp_f, table_name, sql_f), shell=True)
 
-        # Move the sql file to the code path
-        os.rename(sql_f, os.path.join(self.code_path, sql_f))
+        # Move the sql file to the db file within the code folder
+        sql_f_new_path = os.path.join(self.code_path, 'db', sql_f)
+        os.rename(sql_f, sql_f_new_path)
 
         # Return to the code directory
         os.chdir(self.code_path)
 
         # Assign created sql file as instance variable
-        self.sql_fname = sql_f
+        self.sql_fname = sql_f_new_path
 
-    def load_sql_script(self, sql_fname=''):
+        # Assign the table name to instance variable
+        self.sql_load_table_name = table_name
+
+    def load_sql_script(self, drop_original, sql_fname=''):
         """INPUT:
         - sql_fname(STR, OPT) [Either provide one or set by instance]
 
@@ -276,8 +291,14 @@ class PsqlInterface(object):
         - Take given sql script and load it into DB"""
 
         # If no sql file provide, get from instance variable
+        # In case we just wanna load in our own sql script
         if not sql_fname:
             sql_fname = self.sql_fname
+
+        if drop_original:
+            drop_query = 'DROP TABLE %s;' % self.sql_load_table_name
+            drop_msg = 'Droping Table %s...' % self.sql_load_table_name
+            self.execute_q(drop_query, msg=drop_msg)
 
         query = open(sql_fname).read()
         self.execute_q(query, msg='Loading in %s...' % sql_fname)

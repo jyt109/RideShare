@@ -16,14 +16,14 @@ class MatchDistrict(SqlQueries):
     - Read in a subset of the NYC taxi ride data
     - Cleaning it and put it into the DB"""
 
-    def __init__(self, district_fname, file_path):
+    def __init__(self, district_fpath, district_fname):
         super(MatchDistrict, self).__init__()
+        self.district_fpath = district_fpath
         self.district_fname = district_fname
-        self.file_path = file_path
 
-    def load_geojson_to_db(self):
+    def load_geojson_to_db(self, drop_original):
         """INPUT:
-        - NONE
+        - drop_original(BOOL) [Drop the original table when loading script]
 
         OUTPUT:
         - NONE
@@ -31,9 +31,9 @@ class MatchDistrict(SqlQueries):
         DOC:
         - Load district geojson into db after converting to shp then sql"""
 
-        self.convert_geojson_to_sql(self.file_path, self.district_fname,
+        self.convert_geojson_to_sql(self.district_fpath, self.district_fname,
                                     self.t_district, single_geom=False)
-        self.load_sql_script()
+        self.load_sql_script(drop_original)
 
     def match_district_to_rides(self):
         """INPUT:

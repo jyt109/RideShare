@@ -12,14 +12,31 @@ class MongoUtil(object):
     DOC:
     - Abstraction of MongoDB to easily access MongoDB functions"""
 
-    def __init__(self, db_name, table_name):
-        self.db_name = db_name
-        self.table_name = table_name
+    def __init__(self, m_db_name, m_table_name, wipe):
+        self.m_db_name = m_db_name
+        self.m_table_name = m_table_name
         print 'Launching Mongo...'
         self.client = MongoClient()
-        print 'DATABASE AND TABLE', self.db_name, self.table_name
-        self.mongodb = self.client[self.db_name]
-        self.tab = self.mongodb[self.table_name]
+        print 'MONGO DATABASE: ', self.m_db_name
+        print 'MONGO TABLE: ', self.m_table_name
+        self.mongodb = self.client[self.m_db_name]
+        self.tab = self.mongodb[self.m_table_name]
+        if wipe:
+            print 'Wiping the current table...'
+            # Wipe the table before we start (in case of previous entries)
+            self.remove_all()
+
+    def remove_all(self):
+        """INPUT:
+        - NONE
+
+        OUTPUT:
+        - NONE
+
+        DOC:
+        - Wipe everything in the database"""
+
+        self.tab.remove({})
 
     def get_all(self, limit=None):
         """INPUT:

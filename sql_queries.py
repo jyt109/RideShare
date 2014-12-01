@@ -16,11 +16,13 @@ class SqlQueries(PsqlInterface):
     def __init__(self,
                  t_ride='ride',
                  t_district='district_bounds',
-                 t_ride_dist='ride_district'):
+                 t_ride_dist='ride_district',
+                 t_route='route'):
         super(SqlQueries, self).__init__('ridemeter', created=True)
         self.t_ride = t_ride
         self.t_district = t_district
         self.t_ride_dist = t_ride_dist
+        self.t_route = t_route
 
     def sql_rides_district(self):
         """INPUT:
@@ -68,7 +70,7 @@ class SqlQueries(PsqlInterface):
             INNER JOIN dropoff_district AS d
             ON p.ride = d.ride
            );
-        ''' % self.t_ride_dist # ride_district
+        ''' % self.t_ride_dist  # ride_district
 
         # Dropping the unnecessary tables
         query_four = \
@@ -81,7 +83,7 @@ class SqlQueries(PsqlInterface):
         self.execute_q(query_three, msg='Creating Joint Table...')
         self.execute_q(query_four, msg='Dropping first 2 tables...')
 
-    def sql_osrm_lat_long(self):
+    def sql_osrm_two_lat_long(self):
         """INPUT:
         - NONE
 
@@ -94,10 +96,10 @@ class SqlQueries(PsqlInterface):
 
         # Select pickup and dropoff Lat, Long
         query = \
-        '''SELECT ride, CONCAT_WS(',', pickup_latitude, pickup_longitude),
+        """SELECT ride, CONCAT_WS(',', pickup_latitude, pickup_longitude),
            CONCAT_WS(',',dropoff_latitude, dropoff_longitude)
            FROM %s
-        ''' % self.t_ride
+        """ % self.t_ride
 
         # Fetching from the query
         msg = 'Getting pickup and dropoff coordinates...'

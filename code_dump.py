@@ -1,4 +1,44 @@
 
+    def run_four_locations(self, startOSRM=True):
+        """INPUT:
+        - NONE
+
+        OUTPUT:
+        - (GENERATOR) [Rows containing all Lat, Long pairs to be used in OSRM]
+
+        DOC:
+        - Go to where OSRM is and start the server"""
+
+        if startOSRM:
+            self.startOSRMServer()
+        tab = self.launchMongo()
+        osrm_root = '''http://localhost:%s/viaroute?loc=%s&loc=%s&loc=%s&loc=%s'''
+        ride_pd_rows = self.osrmInput()
+        for ind, row in enumerate(ride_pd_rows, start=1):
+            if ind % 1000 == 0 or ind == 10 or ind == 100:
+                print 'Done: %d OSRM entries ...' % ind
+            cride, mride =  row[:2]
+            cp_latlong, cd_latlong, mp_latlong, md_latlong = [item.replace(' ','') for item in row[2:]]
+            url_1 = osrm_root % (self.port, cp_latlong, mp_latlong, cd_latlong, md_latlong)
+            url_2 = osrm_root % (self.port, cp_latlong, mp_latlong, md_latlong, cd_latlong)
+            response1 = requests.get(url_1)
+            response2 = requests.get(url_2)
+            feat_dict1 = self.response2dict(response1, [cride, mride], key=2)
+            feat_dict2 = self.response2dict(response2, [cride, mride], key=2)
+            if feat_dict1 and feat_dict2:
+                if feat_dict1['osrm_time'] > feat_dict2['osrm_time']:
+                    feat_dict2['ride_share_type'] = '2'
+                    tab.insert(feat_dict2)
+                else:
+                    feat_dict1['ride_share_type'] = '1'
+                    tab.insert(feat_dict1)
+            elif feat_dict1 and not feat_dict2:
+                feat_dict1['ride_share_type'] = '1'
+                tab.insert(feat_dict1)
+            elif feat_dict2 and not feat_dict1:
+                feat_dict2['ride_share_type'] = '2'
+                tab.insert(feat_dict2)
+
 
 
 
