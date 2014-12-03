@@ -42,30 +42,6 @@
 
 
 
-    def sql_osrm_lat_long(self, execute=True):
-        '''
-        INPUT: BOOL(OPTIONAL)
-        OUTPUT: STRING OR GENERATOR(Query Results)
-
-        - OSRM queries need pickup and dropoff locations as LineString
-        - Latitude,Longitude (Note there must be no space between the two)
-        - Route table will be loaded in by loadInSql() by converting shp file from OSRM
-        '''
-
-        # select pickup and dropoff lat,long
-        q = \
-        '''SELECT ride, CONCAT_WS(',', pickup_latitude, pickup_longitude),
-           CONCAT_WS(',',dropoff_latitude, dropoff_longitude)
-           FROM %s
-        ''' % self.t_ride
-
-        # Executing the query
-        q_done = self.executeQ(q, execute=execute, msg='Getting pickup and dropoff coordinates...')
-        if execute:
-            return self.cursor.fetchall()
-        else:
-            return q_done
-
     def sql_ride_district_route(self, execute=True):
         '''
         INPUT: BOOL(OPTIONAL)
@@ -97,22 +73,7 @@
         else:
             return (q1, q2)
 
-    def sql4RSFilter1(self, execute=True):
-        '''
-        INPUT: BOOL(OPTIONAL)
-        OUTPUT: STRING OR None
 
-        - Merge ride, district and route to make one table
-        '''
-
-
-        q = '''SELECT ride, pickup_datetime, pcity
-            FROM %s
-            WHERE trip_time_in_secs > 60 AND
-            osrm_time > 60
-            ORDER BY pickup_datetime, dropoff_datetime;''' % self.all_tab
-        df = pdsql.read_sql(q, self.conn)
-        return df
 
     def sql4joinFirstFilter(self, execute=True):
         q = \

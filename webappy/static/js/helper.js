@@ -1,10 +1,10 @@
 function format (d) {
     var ride1P = d[6],
     ride2P = d[7];
-    if (d[10] === "1") {
+    if (d[10] === 1) {
         var ride1D = d[8],
         ride2D = d[9];
-    } else if(d[10] === "2"){
+    } else if(d[10] === 2){
         var ride1D = d[8],
         ride2D = d[9];
     } else {

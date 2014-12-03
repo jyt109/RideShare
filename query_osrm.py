@@ -60,11 +60,11 @@ class QueryOSRM(SqlQueries):
         - (GENERATOR) [Rows containing all Lat, Long pairs to be used in OSRM]
 
         DOC:
-        - Go to where OSRM is and start the server"""
+        - Extract the input for extract route between 2 points"""
 
         return self.sql_osrm_two_lat_long()
 
-    def run_two_locations(self):
+    def osrm_link_four_input(self):
         """INPUT:
         - NONE
 
@@ -72,7 +72,20 @@ class QueryOSRM(SqlQueries):
         - (GENERATOR) [Rows containing all Lat, Long pairs to be used in OSRM]
 
         DOC:
-        - Go to where OSRM is and start the server"""
+        - Extract the input for extract route between 4 points"""
+
+        return self.sql_osrm_four_lat_long()
+
+    def run_two_locations(self):
+        """INPUT:
+        - NONE
+
+        OUTPUT:
+        - NONE
+
+        DOC:
+        - Get route between pickup and dropoff of a single ride
+        - Push results to MongoDB"""
 
         # Get the lat,long input for two locations
         ride_pick_drop = self.osrm_link_two_input()
@@ -94,6 +107,52 @@ class QueryOSRM(SqlQueries):
 
             # Get the reformatted features
             feat_dict = self.osrm_response_to_dict(response, [ride], 0)
+
+            #Insert into MongoDB
+            if feat_dict:
+                self.mongo_inst_tab.insert(feat_dict)
+
+    def run_four_locations(self):
+        """INPUT:
+        - NONE
+
+        OUTPUT:
+        - (GENERATOR) [Rows containing all Lat, Long pairs to be used in OSRM]
+
+        DOC:
+        - Get shared route between pickups and dropoffs of two matched rides
+        - Push results to MongoDB"""
+
+        # Get the lat,long input for two locations
+        ride_pick_drop = self.osrm_link_four_input()
+
+        # Template link for the lat,long input
+        link = '''http://localhost:%s/viaroute?loc=%s&loc=%s&loc=%s&loc=%s'''
+
+        # Creating the links and running them
+        for ind, row in enumerate(ride_pick_drop, start=1):
+
+            # Keep track of how many run
+            if ind % 1000 == 0 or ind == 10 or ind == 100:
+                print 'Inserted into Mongo: %d OSRM entries ...' % ind
+
+            cride, mride, cploc, cdloc, mploc, mdloc = row
+            # Ride share type 1 where first picked up dropped first
+            full_link_1 = link % (self.port, cploc, mploc, cdloc, mdloc)
+            # Ride share type 2 where second picked up dropped first
+            full_link_2 = link % (self.port, cploc, mploc, mdloc, cdloc)
+
+            response_1 = requests.get(full_link_1)
+            response_2 = requests.get(full_link_2)
+
+            # Get the reformatted features
+            feat_dict_1 = self.osrm_response_to_dict(response_1,
+                                                     [cride, mride], 1)
+            feat_dict_2 = self.osrm_response_to_dict(response_2,
+                                                     [cride, mride], 2)
+
+            # Compare the versions of shared ride to see which is shorter
+            feat_dict = self.compare_two_routes(feat_dict_1, feat_dict_2)
 
             #Insert into MongoDB
             if feat_dict:
@@ -222,12 +281,18 @@ class QueryOSRM(SqlQueries):
         OUTPUT:
         - (DICT) [Information we need from OSRM to put into Mongo]"""
 
-        if route_1['osrm_dist'] > route_2['osrm_dist']:
-            best = route_2
-        elif route_2['osrm_dist'] > route_1['osrm_dist']:
-            best = route_1
+        if route_1 and route_2:
+            if route_1['osrm_dist'] > route_2['osrm_dist']:
+                best = route_2
+            elif route_2['osrm_dist'] > route_1['osrm_dist']:
+                best = route_1
+            else:
+                # If equal distance, return route_1
+                best = route_1
+            return best
+        elif route_1 and not route_2:
+            return route_1
+        elif route_2 and not route_1:
+            return route_2
         else:
-            # If equal distance, return route_1
-            best = route_1
-
-        return best
+            return {}

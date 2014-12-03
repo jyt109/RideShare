@@ -4,11 +4,6 @@ import re
 import psycopg2
 from psycopg2 import ProgrammingError
 from sqlalchemy import create_engine
-# import time
-# import datetime
-# import json
-# import pandas as pd
-# import pandas.io.sql as pdsql
 
 
 class PsqlInterface(object):
@@ -74,6 +69,8 @@ class PsqlInterface(object):
         start_conn = psycopg2.connect(dbname='postgres',
                                       user=self.user,
                                       host='/tmp')
+
+        # Need to set isolation_level 0 in order to create database
         start_conn.set_isolation_level(0)
         start_cursor = start_conn.cursor()
         query = 'CREATE DATABASE %s' % self.db_name
@@ -197,7 +194,7 @@ class PsqlInterface(object):
         msg = 'Creating Index %s for %s...' % (index_str, table_name)
         self.execute_q(query, msg=msg)
 
-    def sql_copy_to_table(self, table_name, fpath):
+    def sql_copy_to_table(self, table_name, fpath, append=False):
         """INPUT:
         - table_name(STR) [The name of the table to copy to]
         - fpath(STR) [Absolute path of csv file to copy from]
@@ -215,7 +212,11 @@ class PsqlInterface(object):
                 HEADER
                 DELIMITER AS ','"""
 
+        query_two = """DELETE FROM %s""" % table_name
+
         try:
+            if not append:
+                self.execute_q(query_two, msg='Wiping Table before copying..')
             self.cursor.copy_expert(sql=query % table_name, file=open(fpath))
             self.conn.commit()
         except ProgrammingError as err_msg:
@@ -243,14 +244,6 @@ class PsqlInterface(object):
         shp_f = '%s.shp' % fname
         sql_f = '%s.sql' % fname
 
-        # Remove previously created files to avoid confusion
-        print 'Removing previous files...'
-        for ext in ['.dbf', '.prj', '.shp', '.shx']:
-            try:
-                os.remove(fname + ext)
-            except OSError as err:
-                print err
-
         # Use shell command to convert to shape file
         print 'geojson to shp...'
         shp_cmd = 'ogr2ogr -progress -f "ESRI Shapefile" %s %s OGRGeoJSON' % \
@@ -266,6 +259,12 @@ class PsqlInterface(object):
         else:
             subprocess.call('shp2pgsql -I -s 4326 %s %s > %s' %
                             (shp_f, table_name, sql_f), shell=True)
+
+        # Remove all unnecessary (not .sql) files
+        print 'Removing unnecessary (not .sql) files...'
+        for ext in ['.dbf', '.prj', '.shp', '.shx', '.json']:
+            if os.path.exists(fname + ext):
+                os.remove(fname + ext)
 
         # Move the sql file to the db file within the code folder
         sql_f_new_path = os.path.join(self.code_path, 'db', sql_f)
@@ -296,7 +295,7 @@ class PsqlInterface(object):
             sql_fname = self.sql_fname
 
         if drop_original:
-            drop_query = 'DROP TABLE %s;' % self.sql_load_table_name
+            drop_query = 'DROP TABLE IF EXISTS %s;' % self.sql_load_table_name
             drop_msg = 'Droping Table %s...' % self.sql_load_table_name
             self.execute_q(drop_query, msg=drop_msg)
 

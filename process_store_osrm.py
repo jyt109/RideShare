@@ -6,12 +6,18 @@ import sys
 
 class ProcessStoreOSRM(SqlQueries):
     """Pull OSRM entries from Mongo, decode and put into POSTGIS"""
-    def __init__(self, osrm_entries, route_fpath, route_fname):
+    def __init__(self, osrm_entries, route_table, route_fpath, route_fname):
         # Instantiate superclass SqlQueries
         super(ProcessStoreOSRM, self).__init__()
 
         # Generator containing all osrm results, and the count
         self.osrm_entries, self.osrm_cnt = osrm_entries
+
+        # The table name of the routes
+        if route_table == 'two_pt':
+            self.route_table = self.t_two_pt_route
+        if route_table == 'four_pt':
+            self.route_table = self.t_four_pt_route
 
         # The file name of the geojson containing routes
         self.route_fpath = route_fpath
@@ -97,9 +103,6 @@ class ProcessStoreOSRM(SqlQueries):
         # Delete the id the Mongo assigns
         del feat_dict['_id']
 
-        # print feat_dict
-        # sys.exit(1)
-
         # Recast into a sub geojson object
         sub_geojson['geometry'] = {'coordinates': decoded_route,
                                    'type': 'LineString'}
@@ -152,5 +155,5 @@ class ProcessStoreOSRM(SqlQueries):
         - Load route geojson into db after converting to shp then sql"""
 
         self.convert_geojson_to_sql(self.route_fpath, self.route_fname,
-                                    self.t_route, single_geom=True)
+                                    self.route_table, single_geom=True)
         self.load_sql_script(drop_original)
